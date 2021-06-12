@@ -1,0 +1,137 @@
+{{ define "head" }}
+    <title>Splatoon 2 Battles</title>
+{{end}}
+
+{{ define "content" }}
+    <div class="row">
+        <h1>Splatoon 2 Battles</h1>
+        <div class="col s12 m4 l3">
+            <div class="card darken-1">
+                <form action="" method="get">
+                    <div class="card-content">
+                        <h2 class="card-title">Filtering</h2>
+                        {{/*{{ form.non_field_errors }}
+                        {% for field in form %}
+                            <div class="fieldWrapper input-field">
+                                {{ field.errors }}
+                                {{ field }}
+                                <label class="grey-text text-darken-3" for="{{ field.auto_id }}">{{ field.label }}:</label>
+                            </div>
+                        {% endfor %}*/}}
+                    </div>
+                    <div class="card-action">
+                        <input class="btn waves-effect waves-light" type="submit" value="Filter">
+                        {{/*{% if not search_status %}*/}}
+                            <a href="advanced_search" class="deep-orange-text text-darken-4">Advanced Filter</a>
+                        {{/*{% endif %}*/}}
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="col s12 m8 l9">
+            {{/*{% if my_list %}
+                <div class="card darken-1">
+                    <div class="card-content">
+                        <h2 class="card-title">Summary</h2>
+                        Win percentage: {{ summary.win_rate|floatformat:"2" }}%
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Value</th>
+                                    <th>Min</th>
+                                    <th>Median</th>
+                                    <th>Mean</th>
+                                    <th>Max</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Kills</td>
+                                    <td>{{ summary.kills.min }}</td>
+                                    <td>{{ summary.kills.median|floatformat:"0" }}</td>
+                                    <td>{{ summary.kills.mean|floatformat:"2" }}</td>
+                                    <td>{{ summary.kills.max }} </td>
+                                </tr>
+                                <tr>
+                                    <td>Deaths</td>
+                                    <td>{{ summary.deaths.min }}</td>
+                                    <td>{{ summary.deaths.median|floatformat:"0" }}</td>
+                                    <td>{{ summary.deaths.mean|floatformat:"2" }}</td>
+                                    <td>{{ summary.deaths.max }} </td>
+                                </tr>
+                                <tr>
+                                    <td>Assists</td>
+                                    <td>{{ summary.assists.min }}</td>
+                                    <td>{{ summary.assists.median|floatformat:"0" }}</td>
+                                    <td>{{ summary.assists.mean|floatformat:"2" }}</td>
+                                    <td>{{ summary.assists.max }} </td>
+                                </tr>
+                                <tr>
+                                    <td>Specials</td>
+                                    <td>{{ summary.specials.min }}</td>
+                                    <td>{{ summary.specials.median|floatformat:"0" }}</td>
+                                    <td>{{ summary.specials.mean|floatformat:"2" }}</td>
+                                    <td>{{ summary.specials.max }} </td>
+                                </tr>
+                                <tr>
+                                    <td>Inked</td>
+                                    <td>{{ summary.game_paint_point.min }}</td>
+                                    <td>{{ summary.game_paint_point.median|floatformat:"0" }}</td>
+                                    <td>{{ summary.game_paint_point.mean|floatformat:"2" }}</td>
+                                    <td>{{ summary.game_paint_point.max }} </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="pagination card darken-1">
+                    <div class="card-content">
+                        <h2 class="card-title">Battles</h2>
+                        <span class="step-links">
+                            {% if page_obj.has_previous %}
+                                <a class="blue-text text-darken-4" href="?page=1&query={{ query }}{{ attributes }}">&laquo; first</a>
+                                <a class="blue-text text-darken-4" href="?page={{ page_obj.previous_page_number }}&query={{ query }}{{ attributes }}">previous</a>
+                            {% endif %}
+                            <span class="current">
+                                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                            </span>
+                            {% if page_obj.has_next %}
+                                <a class="blue-text text-darken-4" href="?page={{ page_obj.next_page_number }}&query={{ query }}{{ attributes }}">next</a>
+                                <a class="blue-text text-darken-4" href="?page={{ page_obj.paginator.num_pages }}&query={{ query }}{{ attributes }}">last &raquo;</a>
+                            {% endif %}
+                        </span>
+                        <table>
+                            <tr>
+                                <th>User</th>
+                                <th>Splatnet #</th>
+                                <th>Mode</th>
+                                <th>Stage</th>
+                                <th>Weapon</th>
+                                <th>Result</th>
+                                <th>k/d</th>
+                                <th>Time</th>
+                            </tr>
+                        {% for battle, result, time_val, player_weapons in my_list %}
+                            <tr>
+                                <td>{{ battle.player_name }}</td>
+                                <td><a class="blue-text text-darken-4" href="/two_battles/{{ battle.player_user.id }}/{{ battle.battle_number }}/">{{ battle.battle_number }}</a></td>
+                                <td>{{ battle.get_rule_display }}</td>
+                                <td>{{ battle.get_stage_display }}</td>
+                                <td><img style="height: 36px;" alt="" src="{{ player_weapons }}">{{ battle.get_player_weapon_display }}</td>
+                                <td>{{ result }}</td>
+                                <td>{{ battle.player_kills }}/{{ battle.player_deaths }}</td>
+                                <td>{{ time_val }}</td>
+                            </tr>
+                        {% endfor %}
+                        </table>
+                    </div>
+                </div>
+            {% else %}*/}}
+                <p>No battles are available.</p>
+            {{/*{% endif %}*/}}
+        </div>
+    </div>
+{{end}}
+
+{{define "aftercontent"}}
+{{end}}

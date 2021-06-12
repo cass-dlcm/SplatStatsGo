@@ -1,0 +1,3747 @@
+openapi: 3.0.0
+info:
+  title: SplatStats
+  description: This is the API documentation for a future revision of SplatStats.
+  contact:
+    email: splatstats@cass-dlcm.dev
+  license:
+    name: GNU General Public License 3
+    url: https://www.gnu.org/licenses/gpl-3.0.en.html
+  version: 0.4.0
+servers:
+- url: http://localhost:8080/api/v0-4-0
+- url: https://splatstats.cass-dlcm.dev/api/v0-4-0
+tags:
+- name: two_battles
+  description: Splatoon 2 PvP
+- name: two_salmon
+  description: Splatoon 2 PvE
+- name: user
+  description: Operations about user
+paths:
+  /two_battles/:
+    get:
+      tags:
+      - two_battles
+      summary: Retrieve a list of battles.
+      operationId: getBattles
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Battle'
+                x-content-type: application/json
+        "400":
+          description: Invalid status value
+    post:
+      tags:
+      - two_battles
+      summary: Upload a match result
+      operationId: addBattle
+      parameters:
+      - name: auth_token
+        in: header
+        description: token to be passed as a header
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        $ref: '#/components/requestBodies/Battle'
+      responses:
+        "200":
+          description: successful operation
+  /api/v0-3-0/two_battles/{userId}/{splatnetNum}:
+    get:
+      tags:
+      - two_battles
+      summary: Find Battle by user and Splatnet battle number.
+      description: Returns a single battle
+      operationId: getBattleById
+      parameters:
+      - name: userId
+        in: path
+        description: ID of user
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      - name: splatnetNum
+        in: path
+        description: Splatnet battle number
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Battle'
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Battle not found
+  /two_battles/{userId}:
+    get:
+      tags:
+      - two_battles
+      summary: Find all battles for given user
+      operationId: getBattlesForUser
+      parameters:
+      - name: userId
+        in: path
+        description: ID of user
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      - name: sort
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          enum:
+          - asc
+          - dec
+      - name: lower_bound
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 0
+          type: integer
+      - name: upper_bound
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 0
+          type: integer
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Battle'
+                x-content-type: application/json
+  /two_salmon/:
+    get:
+      tags:
+      - two_salmon
+      summary: Retrieve a list of shifts.
+      operationId: getShifts
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Shift'
+                x-content-type: application/json
+        "400":
+          description: Invalid status value
+    post:
+      tags:
+      - two_salmon
+      summary: Upload a shift result
+      operationId: addShift
+      parameters:
+      - name: auth_token
+        in: header
+        description: token to be passed as a header
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        $ref: '#/components/requestBodies/Shift'
+      responses:
+        "200":
+          description: successful operation
+  /two_salmon/{userId}:
+    get:
+      tags:
+      - two_salmon
+      summary: Find all shifts for given user
+      operationId: getShiftsForUser
+      parameters:
+      - name: userId
+        in: path
+        description: ID of user
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      - name: sort
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          enum:
+          - asc
+          - dec
+      - name: lower_bound
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 0
+          type: integer
+      - name: upper_bound
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 0
+          type: integer
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Shift'
+                x-content-type: application/json
+  /two_salmon/{userId}/{splatnetNum}:
+    get:
+      tags:
+      - two_salmon
+      summary: Find Shift by user and Splatnet shift number.
+      description: Returns a single shift
+      operationId: getShiftById
+      parameters:
+      - name: userId
+        in: path
+        description: ID of user
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      - name: splatnetNum
+        in: path
+        description: Splatnet job ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Shift'
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Shift not found
+  /api/v0-4-0/user/get_token:
+    get:
+      tags:
+      - user
+      summary: Gives the user a session token.
+      operationId: getToken
+      parameters:
+      - name: username
+        in: query
+        description: The user name for login
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: password
+        in: query
+        description: The password for login
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: successful operation
+          headers:
+            X-Rate-Limit:
+              description: calls per hour allowed by the user
+              style: simple
+              explode: false
+              schema:
+                type: integer
+            X-Expires-After:
+              description: date in UTC when token expires
+              style: simple
+              explode: false
+              schema:
+                type: string
+                format: date-time
+          content:
+            application/json:
+              schema:
+                type: string
+                x-content-type: application/json
+        "400":
+          description: Invalid username/password supplied
+  /api/v0-4-0/user/{username}:
+    get:
+      tags:
+      - user
+      summary: Get user id by username
+      operationId: getUserByName
+      parameters:
+      - name: username
+        in: path
+        description: The name that needs to be fetched.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "400":
+          description: Invalid username supplied
+        "404":
+          description: User not found
+components:
+  schemas:
+    Battle:
+      required:
+      - battle_number
+      - player_splatnet_id
+      - splatnet_upload
+      - stat_ink_upload
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        splatnet_json:
+          allOf:
+          - $ref: '#/components/schemas/battleSplatnet'
+          - nullable: true
+        splatnet_upload:
+          type: boolean
+        stat_ink_json:
+          allOf:
+          - $ref: '#/components/schemas/battleStatInk'
+          - nullable: true
+        stat_ink_upload:
+          type: boolean
+        battle_number:
+          type: integer
+        player_splatnet_id:
+          pattern: "^[A-Fa-f0-9]{16}$"
+          type: string
+        elapsed_time:
+          maximum: 420
+          minimum: 0
+          type: integer
+        has_disconnected_player:
+          type: boolean
+        league_point:
+          type: number
+          nullable: true
+        match_type:
+          type: string
+          enum:
+          - league_pair
+          - league_team
+          - ranked
+          - private
+          - turf_war
+          - fes_solo
+          - fes_team
+        rule:
+          type: string
+          enum:
+          - splat_zones
+          - rainmaker
+          - clam_blitz
+          - tower_control
+          - turf_war
+        my_team_count:
+          type: number
+        other_team_count:
+          type: number
+        splatfest_point:
+          type: number
+          nullable: true
+        splatfest_title:
+          type: string
+          nullable: true
+        stage:
+          type: string
+        tag_id:
+          type: string
+        time:
+          type: integer
+        win:
+          type: boolean
+        win_meter:
+          type: number
+        opponent0_splatnet_id:
+          pattern: "^[A-Fa-f0-9]{16}$"
+          type: string
+        opponent0_name:
+          type: string
+        opponent0_rank:
+          type: string
+          nullable: true
+          enum:
+          - C-
+          - C
+          - C+
+          - B-
+          - B
+          - B+
+          - A-
+          - A
+          - A+
+          - S
+          - S+
+          - X
+        opponent0_level_star:
+          minimum: 0
+          type: integer
+        opponent0_level:
+          maximum: 99
+          minimum: 1
+          type: integer
+        opponent0_weapon:
+          type: string
+        opponent0_gender:
+          type: string
+          enum:
+          - boy
+          - girl
+        opponent0_species:
+          type: string
+          enum:
+          - inkling
+          - octoling
+        opponent0_assists:
+          minimum: 0
+          type: integer
+        opponent0_deaths:
+          minimum: 0
+          type: integer
+        opponent0_game_paint_point:
+          minimum: 0
+          type: integer
+        opponent0_kills:
+          minimum: 0
+          type: integer
+        opponent0_specials:
+          minimum: 0
+          type: integer
+        opponent0_headgear:
+          type: string
+          nullable: true
+        opponent0_headgear_main:
+          type: string
+          nullable: true
+        opponent0_headgear_sub0:
+          type: string
+          nullable: true
+        opponent0_headgear_sub1:
+          type: string
+          nullable: true
+        opponent0_headgear_sub2:
+          type: string
+          nullable: true
+        opponent0_clothes:
+          type: string
+          nullable: true
+        opponent0_clothes_main:
+          type: string
+          nullable: true
+        opponent0_clothes_sub0:
+          type: string
+          nullable: true
+        opponent0_clothes_sub1:
+          type: string
+          nullable: true
+        opponent0_clothes_sub2:
+          type: string
+          nullable: true
+        opponent0_shoes:
+          type: string
+          nullable: true
+        opponent0_shoes_main:
+          type: string
+          nullable: true
+        opponent0_shoes_sub0:
+          type: string
+          nullable: true
+        opponent0_shoes_sub1:
+          type: string
+          nullable: true
+        opponent0_shoes_sub2:
+          type: string
+          nullable: true
+        opponent1_splatnet_id:
+          pattern: "^[A-Fa-f0-9]{16}$"
+          type: string
+        opponent1_name:
+          type: string
+        opponent1_rank:
+          type: string
+          nullable: true
+          enum:
+          - C-
+          - C
+          - C+
+          - B-
+          - B
+          - B+
+          - A-
+          - A
+          - A+
+          - S
+          - S+
+          - X
+        opponent1_level_star:
+          minimum: 0
+          type: integer
+        opponent1_level:
+          maximum: 99
+          minimum: 1
+          type: integer
+        opponent1_weapon:
+          type: string
+        opponent1_gender:
+          type: string
+          enum:
+          - boy
+          - girl
+        opponent1_species:
+          type: string
+          enum:
+          - inkling
+          - octoling
+        opponent1_assists:
+          minimum: 0
+          type: integer
+        opponent1_deaths:
+          minimum: 0
+          type: integer
+        opponent1_game_paint_point:
+          minimum: 0
+          type: integer
+        opponent1_kills:
+          minimum: 0
+          type: integer
+        opponent1_specials:
+          minimum: 0
+          type: integer
+        opponent1_headgear:
+          type: string
+          nullable: true
+        opponent1_headgear_main:
+          type: string
+          nullable: true
+        opponent1_headgear_sub0:
+          type: string
+          nullable: true
+        opponent1_headgear_sub1:
+          type: string
+          nullable: true
+        opponent1_headgear_sub2:
+          type: string
+          nullable: true
+        opponent1_clothes:
+          type: string
+          nullable: true
+        opponent1_clothes_main:
+          type: string
+          nullable: true
+        opponent1_clothes_sub0:
+          type: string
+          nullable: true
+        opponent1_clothes_sub1:
+          type: string
+          nullable: true
+        opponent1_clothes_sub2:
+          type: string
+          nullable: true
+        opponent1_shoes:
+          type: string
+          nullable: true
+        opponent1_shoes_main:
+          type: string
+          nullable: true
+        opponent1_shoes_sub0:
+          type: string
+          nullable: true
+        opponent1_shoes_sub1:
+          type: string
+          nullable: true
+        opponent1_shoes_sub2:
+          type: string
+          nullable: true
+        opponent2_splatnet_id:
+          pattern: "^[A-Fa-f0-9]{16}$"
+          type: string
+        opponent2_name:
+          type: string
+        opponent2_rank:
+          type: string
+          nullable: true
+          enum:
+          - C-
+          - C
+          - C+
+          - B-
+          - B
+          - B+
+          - A-
+          - A
+          - A+
+          - S
+          - S+
+          - X
+        opponent2_level_star:
+          minimum: 0
+          type: integer
+        opponent2_level:
+          maximum: 99
+          minimum: 1
+          type: integer
+        opponent2_weapon:
+          type: string
+        opponent2_gender:
+          type: string
+          enum:
+          - boy
+          - girl
+        opponent2_species:
+          type: string
+          enum:
+          - inkling
+          - octoling
+        opponent2_assists:
+          minimum: 0
+          type: integer
+        opponent2_deaths:
+          minimum: 0
+          type: integer
+        opponent2_game_paint_point:
+          minimum: 0
+          type: integer
+        opponent2_kills:
+          minimum: 0
+          type: integer
+        opponent2_specials:
+          minimum: 0
+          type: integer
+        opponent2_headgear:
+          type: string
+          nullable: true
+        opponent2_headgear_main:
+          type: string
+          nullable: true
+        opponent2_headgear_sub0:
+          type: string
+          nullable: true
+        opponent2_headgear_sub1:
+          type: string
+          nullable: true
+        opponent2_headgear_sub2:
+          type: string
+          nullable: true
+        opponent2_clothes:
+          type: string
+          nullable: true
+        opponent2_clothes_main:
+          type: string
+          nullable: true
+        opponent2_clothes_sub0:
+          type: string
+          nullable: true
+        opponent2_clothes_sub1:
+          type: string
+          nullable: true
+        opponent2_clothes_sub2:
+          type: string
+          nullable: true
+        opponent2_shoes:
+          type: string
+          nullable: true
+        opponent2_shoes_main:
+          type: string
+          nullable: true
+        opponent2_shoes_sub0:
+          type: string
+          nullable: true
+        opponent2_shoes_sub1:
+          type: string
+          nullable: true
+        opponent2_shoes_sub2:
+          type: string
+          nullable: true
+        opponent3_splatnet_id:
+          pattern: "^[A-Fa-f0-9]{16}$"
+          type: string
+        opponent3_name:
+          type: string
+        opponent3_rank:
+          type: string
+          nullable: true
+          enum:
+          - C-
+          - C
+          - C+
+          - B-
+          - B
+          - B+
+          - A-
+          - A
+          - A+
+          - S
+          - S+
+          - X
+        opponent3_level_star:
+          minimum: 0
+          type: integer
+        opponent3_level:
+          maximum: 99
+          minimum: 1
+          type: integer
+        opponent3_weapon:
+          type: string
+        opponent3_gender:
+          type: string
+          enum:
+          - boy
+          - girl
+        opponent3_species:
+          type: string
+          enum:
+          - inkling
+          - octoling
+        opponent3_assists:
+          minimum: 0
+          type: integer
+        opponent3_deaths:
+          minimum: 0
+          type: integer
+        opponent3_game_paint_point:
+          minimum: 0
+          type: integer
+        opponent3_kills:
+          minimum: 0
+          type: integer
+        opponent3_specials:
+          minimum: 0
+          type: integer
+        opponent3_headgear:
+          type: string
+          nullable: true
+        opponent3_headgear_main:
+          type: string
+          nullable: true
+        opponent3_headgear_sub0:
+          type: string
+          nullable: true
+        opponent3_headgear_sub1:
+          type: string
+          nullable: true
+        opponent3_headgear_sub2:
+          type: string
+          nullable: true
+        opponent3_clothes:
+          type: string
+          nullable: true
+        opponent3_clothes_main:
+          type: string
+          nullable: true
+        opponent3_clothes_sub0:
+          type: string
+          nullable: true
+        opponent3_clothes_sub1:
+          type: string
+          nullable: true
+        opponent3_clothes_sub2:
+          type: string
+          nullable: true
+        opponent3_shoes:
+          type: string
+          nullable: true
+        opponent3_shoes_main:
+          type: string
+          nullable: true
+        opponent3_shoes_sub0:
+          type: string
+          nullable: true
+        opponent3_shoes_sub1:
+          type: string
+          nullable: true
+        opponent3_shoes_sub2:
+          type: string
+          nullable: true
+        teammate0_splatnet_id:
+          pattern: "^[A-Fa-f0-9]{16}$"
+          type: string
+        teammate0_name:
+          type: string
+        teammate0_rank:
+          type: string
+          nullable: true
+          enum:
+          - C-
+          - C
+          - C+
+          - B-
+          - B
+          - B+
+          - A-
+          - A
+          - A+
+          - S
+          - S+
+          - X
+        teammate0_level_star:
+          minimum: 0
+          type: integer
+        teammate0_level:
+          maximum: 99
+          minimum: 1
+          type: integer
+        teammate0_weapon:
+          type: string
+        teammate0_gender:
+          type: string
+          enum:
+          - boy
+          - girl
+        teammate0_species:
+          type: string
+          enum:
+          - inkling
+          - octoling
+        teammate0_assists:
+          minimum: 0
+          type: integer
+        teammate0_deaths:
+          minimum: 0
+          type: integer
+        teammate0_game_paint_point:
+          minimum: 0
+          type: integer
+        teammate0_kills:
+          minimum: 0
+          type: integer
+        teammate0_specials:
+          minimum: 0
+          type: integer
+        teammate0_headgear:
+          type: string
+          nullable: true
+        teammate0_headgear_main:
+          type: string
+          nullable: true
+        teammate0_headgear_sub0:
+          type: string
+          nullable: true
+        teammate0_headgear_sub1:
+          type: string
+          nullable: true
+        teammate0_headgear_sub2:
+          type: string
+          nullable: true
+        teammate0_clothes:
+          type: string
+          nullable: true
+        teammate0_clothes_main:
+          type: string
+          nullable: true
+        teammate0_clothes_sub0:
+          type: string
+          nullable: true
+        teammate0_clothes_sub1:
+          type: string
+          nullable: true
+        teammate0_clothes_sub2:
+          type: string
+          nullable: true
+        teammate0_shoes:
+          type: string
+          nullable: true
+        teammate0_shoes_main:
+          type: string
+          nullable: true
+        teammate0_shoes_sub0:
+          type: string
+          nullable: true
+        teammate0_shoes_sub1:
+          type: string
+          nullable: true
+        teammate0_shoes_sub2:
+          type: string
+          nullable: true
+        teammate1_splatnet_id:
+          pattern: "^[A-Fa-f0-9]{16}$"
+          type: string
+        teammate1_name:
+          type: string
+        teammate1_rank:
+          type: string
+          nullable: true
+          enum:
+          - C-
+          - C
+          - C+
+          - B-
+          - B
+          - B+
+          - A-
+          - A
+          - A+
+          - S
+          - S+
+          - X
+        teammate1_level_star:
+          minimum: 0
+          type: integer
+        teammate1_level:
+          maximum: 99
+          minimum: 1
+          type: integer
+        teammate1_weapon:
+          type: string
+        teammate1_gender:
+          type: string
+          enum:
+          - boy
+          - girl
+        teammate1_species:
+          type: string
+          enum:
+          - inkling
+          - octoling
+        teammate1_assists:
+          minimum: 0
+          type: integer
+        teammate1_deaths:
+          minimum: 0
+          type: integer
+        teammate1_game_paint_point:
+          minimum: 0
+          type: integer
+        teammate1_kills:
+          minimum: 0
+          type: integer
+        teammate1_specials:
+          minimum: 0
+          type: integer
+        teammate1_headgear:
+          type: string
+          nullable: true
+        teammate1_headgear_main:
+          type: string
+          nullable: true
+        teammate1_headgear_sub0:
+          type: string
+          nullable: true
+        teammate1_headgear_sub1:
+          type: string
+          nullable: true
+        teammate1_headgear_sub2:
+          type: string
+          nullable: true
+        teammate1_clothes:
+          type: string
+          nullable: true
+        teammate1_clothes_main:
+          type: string
+          nullable: true
+        teammate1_clothes_sub0:
+          type: string
+          nullable: true
+        teammate1_clothes_sub1:
+          type: string
+          nullable: true
+        teammate1_clothes_sub2:
+          type: string
+          nullable: true
+        teammate1_shoes:
+          type: string
+          nullable: true
+        teammate1_shoes_main:
+          type: string
+          nullable: true
+        teammate1_shoes_sub0:
+          type: string
+          nullable: true
+        teammate1_shoes_sub1:
+          type: string
+          nullable: true
+        teammate1_shoes_sub2:
+          type: string
+          nullable: true
+        teammate2_splatnet_id:
+          pattern: "^[A-Fa-f0-9]{16}$"
+          type: string
+        teammate2_name:
+          type: string
+        teammate2_rank:
+          type: string
+          nullable: true
+          enum:
+          - C-
+          - C
+          - C+
+          - B-
+          - B
+          - B+
+          - A-
+          - A
+          - A+
+          - S
+          - S+
+          - X
+        teammate2_level_star:
+          minimum: 0
+          type: integer
+        teammate2_level:
+          maximum: 99
+          minimum: 1
+          type: integer
+        teammate2_weapon:
+          type: string
+        teammate2_gender:
+          type: string
+          enum:
+          - boy
+          - girl
+        teammate2_species:
+          type: string
+          enum:
+          - inkling
+          - octoling
+        teammate2_assists:
+          minimum: 0
+          type: integer
+        teammate2_deaths:
+          minimum: 0
+          type: integer
+        teammate2_game_paint_point:
+          minimum: 0
+          type: integer
+        teammate2_kills:
+          minimum: 0
+          type: integer
+        teammate2_specials:
+          minimum: 0
+          type: integer
+        teammate2_headgear:
+          type: string
+          nullable: true
+        teammate2_headgear_main:
+          type: string
+          nullable: true
+        teammate2_headgear_sub0:
+          type: string
+          nullable: true
+        teammate2_headgear_sub1:
+          type: string
+          nullable: true
+        teammate2_headgear_sub2:
+          type: string
+          nullable: true
+        teammate2_clothes:
+          type: string
+          nullable: true
+        teammate2_clothes_main:
+          type: string
+          nullable: true
+        teammate2_clothes_sub0:
+          type: string
+          nullable: true
+        teammate2_clothes_sub1:
+          type: string
+          nullable: true
+        teammate2_clothes_sub2:
+          type: string
+          nullable: true
+        teammate2_shoes:
+          type: string
+          nullable: true
+        teammate2_shoes_main:
+          type: string
+          nullable: true
+        teammate2_shoes_sub0:
+          type: string
+          nullable: true
+        teammate2_shoes_sub1:
+          type: string
+          nullable: true
+        teammate2_shoes_sub2:
+          type: string
+          nullable: true
+        player_name:
+          type: string
+        player_rank:
+          type: string
+          nullable: true
+          enum:
+          - C-
+          - C
+          - C+
+          - B-
+          - B
+          - B+
+          - A-
+          - A
+          - A+
+          - S
+          - S+
+          - X
+        player_level_star:
+          minimum: 0
+          type: integer
+        player_level:
+          maximum: 99
+          minimum: 1
+          type: integer
+        player_weapon:
+          type: string
+        player_gender:
+          type: string
+          enum:
+          - boy
+          - girl
+        player_species:
+          type: string
+          enum:
+          - inkling
+          - octoling
+        player_assists:
+          minimum: 0
+          type: integer
+        player_deaths:
+          minimum: 0
+          type: integer
+        player_game_paint_point:
+          minimum: 0
+          type: integer
+        player_kills:
+          minimum: 0
+          type: integer
+        player_specials:
+          minimum: 0
+          type: integer
+        player_headgear:
+          type: string
+          nullable: true
+        player_headgear_main:
+          type: string
+          nullable: true
+        player_headgear_sub0:
+          type: string
+          nullable: true
+        player_headgear_sub1:
+          type: string
+          nullable: true
+        player_headgear_sub2:
+          type: string
+          nullable: true
+        player_clothes:
+          type: string
+          nullable: true
+        player_clothes_main:
+          type: string
+          nullable: true
+        player_clothes_sub0:
+          type: string
+          nullable: true
+        player_clothes_sub1:
+          type: string
+          nullable: true
+        player_clothes_sub2:
+          type: string
+          nullable: true
+        player_shoes:
+          type: string
+          nullable: true
+        player_shoes_main:
+          type: string
+          nullable: true
+        player_shoes_sub0:
+          type: string
+          nullable: true
+        player_shoes_sub1:
+          type: string
+          nullable: true
+        player_shoes_sub2:
+          type: string
+          nullable: true
+      example:
+        player_gender: boy
+        opponent0_clothes_main: opponent0_clothes_main
+        opponent1_clothes_sub2: opponent1_clothes_sub2
+        teammate1_clothes_main: teammate1_clothes_main
+        opponent0_shoes_sub0: opponent0_shoes_sub0
+        opponent0_shoes_sub1: opponent0_shoes_sub1
+        opponent0_shoes_sub2: opponent0_shoes_sub2
+        teammate2_kills: 0
+        opponent1_clothes_sub0: opponent1_clothes_sub0
+        opponent1_clothes_sub1: opponent1_clothes_sub1
+        teammate1_level_star: 0
+        opponent3_clothes: opponent3_clothes
+        player_name: player_name
+        player_weapon: player_weapon
+        opponent2_assists: 0
+        teammate1_headgear_main: teammate1_headgear_main
+        opponent0_rank: C-
+        opponent3_level_star: 0
+        opponent2_headgear_sub2: opponent2_headgear_sub2
+        teammate1_rank: C-
+        opponent0_level: 41
+        opponent2_game_paint_point: 0
+        opponent2_headgear_sub1: opponent2_headgear_sub1
+        opponent2_headgear_sub0: opponent2_headgear_sub0
+        teammate2_clothes_sub2: teammate2_clothes_sub2
+        opponent2_level_star: 0
+        teammate1_clothes_sub1: teammate1_clothes_sub1
+        teammate1_clothes_sub2: teammate1_clothes_sub2
+        teammate0_level: 70
+        teammate1_clothes_sub0: teammate1_clothes_sub0
+        opponent1_kills: 0
+        teammate2_clothes_sub0: teammate2_clothes_sub0
+        teammate2_clothes_sub1: teammate2_clothes_sub1
+        teammate0_clothes: teammate0_clothes
+        league_point: 5.962133916683182377482808078639209270477294921875
+        opponent1_clothes_main: opponent1_clothes_main
+        teammate2_level_star: 0
+        teammate1_level: 30
+        opponent2_headgear: opponent2_headgear
+        opponent1_headgear_sub2: opponent1_headgear_sub2
+        opponent2_weapon: opponent2_weapon
+        opponent2_clothes_sub0: opponent2_clothes_sub0
+        teammate0_deaths: 0
+        opponent1_headgear_sub1: opponent1_headgear_sub1
+        opponent0_clothes_sub1: opponent0_clothes_sub1
+        opponent1_headgear_sub0: opponent1_headgear_sub0
+        opponent2_clothes_sub2: opponent2_clothes_sub2
+        teammate0_clothes_main: teammate0_clothes_main
+        opponent0_clothes_sub2: opponent0_clothes_sub2
+        opponent2_clothes_sub1: opponent2_clothes_sub1
+        opponent0_clothes_sub0: opponent0_clothes_sub0
+        opponent0_species: inkling
+        opponent2_shoes: opponent2_shoes
+        teammate0_assists: 0
+        match_type: league_pair
+        teammate1_game_paint_point: 0
+        player_level: 6
+        teammate0_level_star: 0
+        opponent2_headgear_main: opponent2_headgear_main
+        player_shoes_sub1: player_shoes_sub1
+        opponent0_gender: boy
+        player_shoes_sub2: player_shoes_sub2
+        player_shoes_sub0: player_shoes_sub0
+        player_game_paint_point: 0
+        opponent3_shoes: opponent3_shoes
+        stat_ink_upload: true
+        teammate1_gender: boy
+        opponent2_specials: 0
+        stage: stage
+        opponent2_rank: C-
+        opponent1_shoes_sub0: opponent1_shoes_sub0
+        opponent3_species: inkling
+        teammate2_clothes_main: teammate2_clothes_main
+        player_clothes_sub2: player_clothes_sub2
+        opponent1_shoes_sub1: opponent1_shoes_sub1
+        player_clothes_sub1: player_clothes_sub1
+        teammate1_specials: 0
+        player_clothes_sub0: player_clothes_sub0
+        opponent1_level: 12
+        opponent1_shoes_sub2: opponent1_shoes_sub2
+        opponent3_headgear_sub0: opponent3_headgear_sub0
+        teammate1_clothes: teammate1_clothes
+        opponent0_kills: 0
+        teammate1_headgear: teammate1_headgear
+        opponent1_specials: 0
+        opponent1_level_star: 0
+        player_clothes: player_clothes
+        opponent0_deaths: 0
+        opponent2_deaths: 0
+        opponent3_deaths: 0
+        teammate0_shoes_sub1: teammate0_shoes_sub1
+        teammate0_shoes_sub0: teammate0_shoes_sub0
+        opponent3_kills: 0
+        opponent3_headgear_sub1: opponent3_headgear_sub1
+        opponent0_name: opponent0_name
+        opponent3_headgear_sub2: opponent3_headgear_sub2
+        teammate0_shoes_sub2: teammate0_shoes_sub2
+        teammate2_specials: 0
+        splatfest_point: 7.061401241503109105224211816675961017608642578125
+        opponent0_headgear: opponent0_headgear
+        tag_id: tag_id
+        teammate1_kills: 0
+        has_disconnected_player: true
+        opponent3_gender: boy
+        teammate2_shoes: teammate2_shoes
+        opponent1_gender: boy
+        teammate1_weapon: teammate1_weapon
+        teammate2_shoes_main: teammate2_shoes_main
+        teammate2_gender: boy
+        opponent3_headgear_main: opponent3_headgear_main
+        teammate0_shoes_main: teammate0_shoes_main
+        opponent2_species: inkling
+        teammate0_clothes_sub2: teammate0_clothes_sub2
+        teammate0_clothes_sub0: teammate0_clothes_sub0
+        splatnet_json: ""
+        teammate0_clothes_sub1: teammate0_clothes_sub1
+        opponent1_shoes: opponent1_shoes
+        opponent1_shoes_main: opponent1_shoes_main
+        teammate2_assists: 0
+        opponent0_weapon: opponent0_weapon
+        rule: splat_zones
+        teammate1_shoes: teammate1_shoes
+        teammate1_deaths: 0
+        opponent2_kills: 0
+        teammate1_splatnet_id: teammate1_splatnet_id
+        opponent3_game_paint_point: 0
+        player_species: inkling
+        teammate2_shoes_sub2: teammate2_shoes_sub2
+        opponent0_clothes: opponent0_clothes
+        other_team_count: 2.3021358869347654518833223846741020679473876953125
+        teammate2_game_paint_point: 0
+        teammate2_shoes_sub1: teammate2_shoes_sub1
+        teammate2_shoes_sub0: teammate2_shoes_sub0
+        teammate0_species: inkling
+        teammate0_shoes: teammate0_shoes
+        time: 9
+        win_meter: 3.61607674925191080461672754609026014804840087890625
+        teammate1_shoes_main: teammate1_shoes_main
+        teammate1_assists: 0
+        player_headgear: player_headgear
+        opponent0_game_paint_point: 0
+        opponent3_headgear: opponent3_headgear
+        opponent1_rank: C-
+        player_kills: 0
+        id: 0
+        opponent0_headgear_main: opponent0_headgear_main
+        opponent0_shoes: opponent0_shoes
+        opponent3_shoes_sub1: opponent3_shoes_sub1
+        opponent3_shoes_sub0: opponent3_shoes_sub0
+        opponent3_shoes_sub2: opponent3_shoes_sub2
+        my_team_count: 5.63737665663332876420099637471139430999755859375
+        opponent2_shoes_main: opponent2_shoes_main
+        player_deaths: 0
+        player_specials: 0
+        opponent3_rank: C-
+        teammate1_species: inkling
+        opponent3_level: 68
+        teammate0_game_paint_point: 0
+        opponent0_splatnet_id: opponent0_splatnet_id
+        opponent2_splatnet_id: opponent2_splatnet_id
+        opponent3_splatnet_id: opponent3_splatnet_id
+        opponent3_weapon: opponent3_weapon
+        opponent1_splatnet_id: opponent1_splatnet_id
+        opponent3_clothes_main: opponent3_clothes_main
+        teammate0_headgear: teammate0_headgear
+        opponent0_headgear_sub0: opponent0_headgear_sub0
+        opponent0_headgear_sub1: opponent0_headgear_sub1
+        opponent0_headgear_sub2: opponent0_headgear_sub2
+        opponent2_level: 89
+        opponent3_shoes_main: opponent3_shoes_main
+        player_shoes: player_shoes
+        player_splatnet_id: player_splatnet_id
+        opponent2_clothes: opponent2_clothes
+        splatnet_upload: true
+        splatfest_title: splatfest_title
+        opponent1_assists: 0
+        teammate2_name: teammate2_name
+        teammate0_weapon: teammate0_weapon
+        opponent2_shoes_sub0: opponent2_shoes_sub0
+        teammate2_level: 42
+        battle_number: 6
+        opponent2_shoes_sub1: opponent2_shoes_sub1
+        opponent2_shoes_sub2: opponent2_shoes_sub2
+        player_assists: 0
+        teammate0_rank: C-
+        opponent1_name: opponent1_name
+        teammate0_kills: 0
+        opponent1_game_paint_point: 0
+        opponent1_headgear_main: opponent1_headgear_main
+        teammate2_headgear_sub2: teammate2_headgear_sub2
+        opponent3_clothes_sub2: opponent3_clothes_sub2
+        teammate0_headgear_main: teammate0_headgear_main
+        teammate2_headgear_sub1: teammate2_headgear_sub1
+        opponent3_clothes_sub1: opponent3_clothes_sub1
+        teammate2_headgear_sub0: teammate2_headgear_sub0
+        opponent3_clothes_sub0: opponent3_clothes_sub0
+        opponent1_deaths: 0
+        opponent2_clothes_main: opponent2_clothes_main
+        teammate2_species: inkling
+        opponent1_clothes: opponent1_clothes
+        player_level_star: 0
+        opponent3_assists: 0
+        player_headgear_main: player_headgear_main
+        opponent0_specials: 0
+        player_shoes_main: player_shoes_main
+        opponent0_assists: 0
+        opponent1_headgear: opponent1_headgear
+        teammate0_gender: boy
+        player_clothes_main: player_clothes_main
+        opponent3_name: opponent3_name
+        teammate1_name: teammate1_name
+        teammate2_clothes: teammate2_clothes
+        teammate2_rank: C-
+        opponent0_shoes_main: opponent0_shoes_main
+        opponent1_weapon: opponent1_weapon
+        teammate2_splatnet_id: teammate2_splatnet_id
+        teammate0_specials: 0
+        teammate2_headgear_main: teammate2_headgear_main
+        teammate0_name: teammate0_name
+        teammate2_deaths: 0
+        stat_ink_json: ""
+        opponent2_name: opponent2_name
+        elapsed_time: 61
+        teammate0_splatnet_id: teammate0_splatnet_id
+        teammate2_headgear: teammate2_headgear
+        win: true
+        opponent3_specials: 0
+        opponent0_level_star: 0
+        teammate1_headgear_sub2: teammate1_headgear_sub2
+        player_headgear_sub2: player_headgear_sub2
+        teammate1_headgear_sub1: teammate1_headgear_sub1
+        teammate1_headgear_sub0: teammate1_headgear_sub0
+        teammate2_weapon: teammate2_weapon
+        opponent2_gender: boy
+        player_headgear_sub1: player_headgear_sub1
+        teammate0_headgear_sub0: teammate0_headgear_sub0
+        player_headgear_sub0: player_headgear_sub0
+        teammate0_headgear_sub1: teammate0_headgear_sub1
+        teammate1_shoes_sub0: teammate1_shoes_sub0
+        teammate0_headgear_sub2: teammate0_headgear_sub2
+        opponent1_species: inkling
+        teammate1_shoes_sub2: teammate1_shoes_sub2
+        player_rank: C-
+        teammate1_shoes_sub1: teammate1_shoes_sub1
+    battleSplatnet:
+      type: object
+      properties:
+        udemae:
+          $ref: '#/components/schemas/udemae'
+        stage:
+          $ref: '#/components/schemas/splatnetTriple'
+        other_team_count:
+          maximum: 100
+          minimum: 0
+          type: integer
+        my_team_count:
+          maximum: 100
+          minimum: 0
+          type: integer
+        star_rank:
+          minimum: 0
+          type: integer
+        rule:
+          $ref: '#/components/schemas/rule'
+        player_result:
+          $ref: '#/components/schemas/playerResult'
+        estimate_gachi_power:
+          minimum: 0
+          type: integer
+          nullable: true
+        elapsed_time:
+          maximum: 420
+          minimum: 0
+          type: integer
+        start_time:
+          type: integer
+        game_mode:
+          $ref: '#/components/schemas/splatnetDouble'
+        x_power:
+          type: object
+          nullable: true
+        battle_number:
+          type: string
+        type:
+          type: string
+        player_rank:
+          maximum: 99
+          minimum: 1
+          type: integer
+        crown_players:
+          type: object
+          nullable: true
+        my_team_members:
+          maxItems: 3
+          type: array
+          items:
+            $ref: '#/components/schemas/playerResult'
+        other_team_members:
+          maxItems: 4
+          type: array
+          items:
+            $ref: '#/components/schemas/playerResult'
+        weapon_paint_point:
+          minimum: 0
+          type: integer
+        rank:
+          type: object
+          nullable: true
+        my_team_result:
+          $ref: '#/components/schemas/splatnetDouble'
+        estimate_x_power:
+          type: object
+          nullable: true
+        other_team_result:
+          $ref: '#/components/schemas/splatnetDouble'
+        league_point:
+          type: number
+          nullable: true
+        win_meter:
+          maximum: 99.5
+          minimum: 0
+          type: number
+        my_team_percentage:
+          maximum: 100
+          minimum: 0
+          type: number
+        other_team_percentage:
+          maximum: 100
+          minimum: 0
+          type: number
+        tag_id:
+          type: string
+    udemae:
+      type: object
+      properties:
+        name:
+          type: string
+        is_x:
+          type: boolean
+        is_number_reached:
+          type: boolean
+        number:
+          maximum: 20
+          minimum: 0
+          type: integer
+        s_plus_number:
+          maximum: 9
+          minimum: 0
+          type: integer
+          nullable: true
+    skills:
+      type: object
+      properties:
+        main:
+          $ref: '#/components/schemas/splatnetTriple'
+        subs:
+          maxItems: 3
+          type: array
+          items:
+            $ref: '#/components/schemas/splatnetTriple'
+    splatnetTriple:
+      type: object
+      properties:
+        id:
+          type: string
+        image:
+          type: string
+        name:
+          type: string
+    rule:
+      allOf:
+      - $ref: '#/components/schemas/splatnetDouble'
+      - type: object
+        properties:
+          multiline_name:
+            type: string
+    playerResult:
+      type: object
+      properties:
+        death_count:
+          minimum: 0
+          type: integer
+        game_paint_point:
+          minimum: 0
+          type: integer
+        kill_count:
+          minimum: 0
+          type: integer
+        special_count:
+          minimum: 0
+          type: integer
+        assist_count:
+          minimum: 0
+          type: integer
+        sort_score:
+          maximum: 3
+          minimum: 0
+          type: integer
+        player:
+          $ref: '#/components/schemas/player'
+    player:
+      type: object
+      properties:
+        head_skills:
+          $ref: '#/components/schemas/skills'
+        shoes_skills:
+          $ref: '#/components/schemas/skills'
+        clothes_skills:
+          $ref: '#/components/schemas/skills'
+        player_rank:
+          maximum: 99
+          minimum: 1
+          type: integer
+        star_rank:
+          minimum: 0
+          type: integer
+        nickname:
+          type: string
+        player_type:
+          $ref: '#/components/schemas/playerType'
+        principal_id:
+          type: string
+        head:
+          $ref: '#/components/schemas/clothing'
+        clothes:
+          $ref: '#/components/schemas/clothing'
+        shoes:
+          $ref: '#/components/schemas/clothing'
+        udemae:
+          $ref: '#/components/schemas/udemae'
+        weapon:
+          $ref: '#/components/schemas/weapon'
+    playerType:
+      type: object
+      properties:
+        gender:
+          type: string
+        species:
+          type: string
+    clothing:
+      allOf:
+      - $ref: '#/components/schemas/splatnetTriple'
+      - type: object
+        properties:
+          thumbnail:
+            type: string
+          kind:
+            type: string
+          rarity:
+            type: integer
+          brand:
+            $ref: '#/components/schemas/brand'
+    brand:
+      allOf:
+      - $ref: '#/components/schemas/splatnetTriple'
+      - type: object
+        properties:
+          frequent_skill:
+            $ref: '#/components/schemas/splatnetTriple'
+    weapon:
+      allOf:
+      - $ref: '#/components/schemas/splatnetTriple'
+      - type: object
+        properties:
+          thumbnail:
+            type: string
+          sub:
+            $ref: '#/components/schemas/splatnetQuad'
+          special:
+            $ref: '#/components/schemas/splatnetQuad'
+    splatnetQuad:
+      type: object
+      properties:
+        id:
+          type: string
+        image_a:
+          type: string
+        image_b:
+          type: string
+        name:
+          type: string
+    splatnetDouble:
+      type: object
+      properties:
+        key:
+          type: string
+        name:
+          type: string
+    battleStatInk:
+      type: object
+      properties:
+        id:
+          minimum: 0
+          type: integer
+        splatnet_number:
+          minimum: 0
+          type: integer
+        url:
+          type: string
+          format: uri
+        user:
+          $ref: '#/components/schemas/statInkUser'
+        lobby:
+          $ref: '#/components/schemas/statInkKeyName'
+        mode:
+          $ref: '#/components/schemas/statInkKeyName'
+        rule:
+          $ref: '#/components/schemas/statInkKeyName'
+        map:
+          $ref: '#/components/schemas/statInkMap'
+        weapon:
+          $ref: '#/components/schemas/statInkWeapon'
+        freshness:
+          $ref: '#/components/schemas/statInkFreshness'
+        rank:
+          $ref: '#/components/schemas/statInkRank'
+        rank_exp:
+          type: integer
+          nullable: true
+        rank_after:
+          $ref: '#/components/schemas/statInkRank'
+        x_power:
+          type: object
+          nullable: true
+        x_power_after:
+          type: object
+          nullable: true
+        estimate_x_power:
+          type: object
+          nullable: true
+        level:
+          type: integer
+        level_after:
+          type: integer
+        star_rank:
+          type: integer
+        result:
+          type: string
+        knock_out:
+          type: boolean
+          nullable: true
+        rank_in_team:
+          maximum: 4
+          minimum: 1
+          type: integer
+          nullable: true
+        kill:
+          minimum: 0
+          type: integer
+        death:
+          minimum: 0
+          type: integer
+        kill_or_assist:
+          minimum: 0
+          type: integer
+        special:
+          minimum: 0
+          type: integer
+        kill_ratio:
+          type: number
+        kill_rate:
+          type: number
+        max_kill_combo:
+          type: object
+          nullable: true
+        max_kill_streak:
+          type: object
+          nullable: true
+        death_reasons:
+          type: object
+          nullable: true
+        my_point:
+          minimum: 0
+          type: integer
+        estimate_gachi_power:
+          minimum: 0
+          type: integer
+          nullable: true
+        league_point:
+          type: string
+          nullable: true
+        my_team_estimate_league_point:
+          type: integer
+          nullable: true
+        his_team_estimate_league_point:
+          type: integer
+          nullable: true
+        my_team_point:
+          type: object
+          nullable: true
+        his_team_point:
+          nullable: true
+        my_team_percent:
+          type: string
+          nullable: true
+        his_team_percent:
+          type: string
+          nullable: true
+        my_team_id:
+          type: string
+          nullable: true
+        his_team_id:
+          type: string
+          nullable: true
+        species:
+          $ref: '#/components/schemas/statInkKeyName'
+        gender:
+          $ref: '#/components/schemas/statInkGender'
+        fest_title:
+          $ref: '#/components/schemas/statInkKeyName'
+        fest_exp:
+          type: integer
+          nullable: true
+        fest_title_after:
+          $ref: '#/components/schemas/statInkKeyName'
+        fest_exp_after:
+          type: integer
+          nullable: true
+        fest_power:
+          type: string
+          nullable: true
+        my_team_estimate_fest_power:
+          type: integer
+          nullable: true
+        his_team_my_team_estimate_fest_power:
+          type: integer
+          nullable: true
+        my_team_fest_theme:
+          type: string
+          nullable: true
+        my_team_nickname:
+          type: string
+          nullable: true
+        his_team_nickname:
+          type: string
+          nullable: true
+        clout:
+          type: integer
+          nullable: true
+        total_clout:
+          type: integer
+          nullable: true
+        total_clout_after:
+          type: integer
+          nullable: true
+        my_team_win_streak:
+          type: integer
+          nullable: true
+        his_team_win_streak:
+          type: integer
+          nullable: true
+        synergy_bonus:
+          type: number
+          nullable: true
+        special_battle:
+          allOf:
+          - $ref: '#/components/schemas/statInkKeyName'
+          - nullable: true
+        image_result:
+          type: string
+          nullable: true
+        image_gear:
+          type: string
+          nullable: true
+        gears:
+          $ref: '#/components/schemas/statInkGears'
+        period:
+          type: integer
+        period_range:
+          type: string
+        players:
+          maxItems: 8
+          type: array
+          items:
+            $ref: '#/components/schemas/statInkPlayer'
+        events:
+          type: object
+          nullable: true
+        splatnet_json:
+          type: object
+          nullable: true
+        agent:
+          $ref: '#/components/schemas/statInkAgent'
+        automated:
+          type: boolean
+        environment:
+          type: object
+          nullable: true
+        link_url:
+          type: string
+          format: uri
+          nullable: true
+        note:
+          type: object
+          nullable: true
+        game_version:
+          type: string
+        nawabari_bonus:
+          type: integer
+          nullable: true
+        start_at:
+          $ref: '#/components/schemas/statInkTime'
+        end_at:
+          $ref: '#/components/schemas/statInkTime'
+        register_at:
+          $ref: '#/components/schemas/statInkTime'
+      example:
+        id: 790664
+        splatnet_number: 657
+        url: https://stat.ink/@MunchingCass/spl2/790664
+        user:
+          $ref: '#/components/schemas/statInkUser/example'
+        lobby:
+          $ref: '#/components/schemas/statInkKeyName/example'
+        mode:
+          $ref: '#/components/schemas/statInkKeyName/example'
+        rule:
+          $ref: '#/components/schemas/statInkKeyName/example'
+        map:
+          $ref: '#/components/schemas/statInkMap/example'
+        weapon:
+          $ref: '#/components/schemas/statInkWeapon/example'
+        freshness:
+          $ref: '#/components/schemas/statInkFreshness/example'
+        rank:
+          $ref: '#/components/schemas/statInkRank/example'
+        rank_exp: 1
+        rank_after:
+          $ref: '#/components/schemas/statInkRank/example'
+        rank_exp_after: 2
+        level: 31
+        level_after: 31
+        star_rank: 0
+        result: lose
+        knock_out: true
+        kill: 5
+        death: 5
+        kill_or_assist: 5
+        special: 0
+        kill_ratio: 1
+        kill_rate: 0.5
+        my_point: 381
+        estiamte_gachi_power: 1570
+        league_point: "1872.5"
+        my_team_estimate_league_point: 2060
+        his_team_estimate_league_point: 2010
+        my_team_percent: "58.2"
+        his_team_percent: "29.9"
+        my_team_id: 3IgsPttLKlx
+        species:
+          $ref: '#/components/schemas/statInkKeyName/example'
+        gender:
+          $ref: '#/components/schemas/statInkGender/example'
+        fest_title:
+          $ref: '#/components/schemas/statInkKeyName/example'
+        fest_exp: 0
+        fest_title_after:
+          $ref: '#/components/schemas/statInkKeyName/example'
+        fest_exp_after: 0
+        fest_power: "0.0"
+        my_team_estimate_fest_power: 1850
+        his_team_my_team_estimate_fest_power: 1900
+        my_team_fest_theme: Chaos
+        his_team_fest_theme: Order
+        my_team_nickname: The Jetflame Shadowpunk Custom-Dualie-Squelcher Lady Squad
+        his_team_nickname: The Squid Squad
+        clout: 2069
+        total_clout: 50485
+        total_clout_after: 52554
+        my_team_win_streak: 0
+        his_team_win_streak: 0
+        synergy_bonus: 1.2
+        special_battle:
+          $ref: '#/components/schemas/statInkKeyName/example'
+        image_result: https://img.stat.ink/p6/p6yau4fayvcu7d4ickdkkjckxq.jpg
+        image_gear: https://img.stat.ink/gi/gi4cauq5z5dyzotlxqtxtn5b7e.jpg
+        gears:
+          $ref: '#/components/schemas/statInkGears/example'
+        period: 212046
+        period_range: 2018-05-19T12:00:00+00:00/2018-05-19T14:00:00+00:00
+    statInkUser:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        screen_name:
+          type: string
+        url:
+          type: string
+          format: uri
+        join_at:
+          $ref: '#/components/schemas/statInkTime'
+        profile:
+          $ref: '#/components/schemas/statInkProfile'
+        stat:
+          type: object
+          nullable: true
+        stats:
+          $ref: '#/components/schemas/statInkStats'
+      example:
+        id: 9568
+        name: "Cass, the Fae"
+        screen_name: MunchingCass
+        url: https://stat.ink/@MunchingCass
+        join_at:
+          $ref: '#/components/schemas/statInkTime/example'
+        profile:
+          $ref: '#/components/schemas/statInkProfile/example'
+        stats:
+          $ref: '#/components/schemas/statInkStats/example'
+    statInkTime:
+      type: object
+      properties:
+        time:
+          type: integer
+        iso8601:
+          type: string
+          format: date-time
+      example:
+        time: 1527811200
+        iso8601: 2018-06-01T00:00:00Z
+    statInkProfile:
+      type: object
+      properties:
+        nnid:
+          type: object
+          nullable: true
+        friend_code:
+          type: string
+          nullable: true
+        twitter:
+          type: object
+          nullable: true
+        ikanakama:
+          type: object
+          nullable: true
+        ikanakama2:
+          type: object
+          nullable: true
+        environment:
+          type: object
+          nullable: true
+      example:
+        friend_code: SW-3454-6911-0516
+    statInkStats:
+      type: object
+      properties:
+        v1:
+          type: object
+          nullable: true
+        v2:
+          $ref: '#/components/schemas/statInkV2'
+      example:
+        v2:
+          $ref: '#/components/schemas/statInkV2/example'
+    statInkV2:
+      type: object
+      properties:
+        updated_at:
+          $ref: '#/components/schemas/statInkTime'
+        entire:
+          $ref: '#/components/schemas/statInkEntire'
+        nawabari:
+          $ref: '#/components/schemas/statInkNawabari'
+        gachi:
+          $ref: '#/components/schemas/statInkGachi'
+      example:
+        updated_at:
+          $ref: '#/components/schemas/statInkTime/example'
+        entire:
+          $ref: '#/components/schemas/statInkEntire/example'
+        nawabari:
+          $ref: '#/components/schemas/statInkNawabari/example'
+        gachi:
+          $ref: '#/components/schemas/statInkGachi/example'
+    statInkEntire:
+      type: object
+      properties:
+        battles:
+          type: integer
+        win_pct:
+          type: number
+        kill_ratio:
+          type: number
+        kill_total:
+          type: integer
+        kill_avg:
+          type: number
+        kill_per_min:
+          type: number
+        death_total:
+          type: integer
+        death_avg:
+          type: number
+        death_per_min:
+          type: number
+      example:
+        battles: 4448
+        win_pct: 48.78597122302158
+        kill_ratio: 0.69
+        kill_total: 25647
+        kill_avg: 5.773750562809545
+        kill_per_min: 1.5879364627286603
+        death_total: 36940
+        death_avg: 8.316073840612336
+        death_per_min: 2.2871436399265686
+    statInkNawabari:
+      example:
+        allOf:
+        - $ref: '#/components/schemas/statInkEntire/example'
+        - total_inked: 1096372
+        - max_inked: 1414
+        - avg_inked: 783.1228571428571
+      allOf:
+      - $ref: '#/components/schemas/statInkEntire'
+      - type: object
+        properties:
+          total_inked:
+            type: integer
+          max_inked:
+            type: integer
+          avg_inked:
+            type: number
+    statInkGachi:
+      example:
+        allOf:
+        - $ref: '#/components/schemas/statInkEntire/example'
+        - rules:
+            $ref: '#/components/schemas/statInkRules/example'
+      allOf:
+      - $ref: '#/components/schemas/statInkEntire'
+      - type: object
+        properties:
+          rules:
+            $ref: '#/components/schemas/statInkRules'
+    statInkRules:
+      type: object
+      properties:
+        area:
+          $ref: '#/components/schemas/statInkRulesSub'
+        yagura:
+          $ref: '#/components/schemas/statInkRulesSub'
+        hoko:
+          $ref: '#/components/schemas/statInkRulesSub'
+        asari:
+          $ref: '#/components/schemas/statInkRulesSub'
+      example:
+        area:
+          $ref: '#/components/schemas/statInkRulesSub/example'
+        yagura:
+          $ref: '#/components/schemas/statInkRulesSub/example'
+        hoko:
+          $ref: '#/components/schemas/statInkRulesSub/example'
+        asari:
+          $ref: '#/components/schemas/statInkRulesSub/example'
+    statInkRulesSub:
+      type: object
+      properties:
+        rank_peak:
+          type: string
+        rank_current:
+          type: string
+        x_power_peak:
+          type: object
+          nullable: true
+        x_power_current:
+          type: object
+          nullable: true
+      example:
+        rank_peak: S+ 3
+        rank_current: S+ 2
+    statInkKeyName:
+      type: object
+      properties:
+        key:
+          type: string
+        name:
+          $ref: '#/components/schemas/statInkName'
+      example:
+        key: gachi
+        name:
+          $ref: '#/components/schemas/statInkName/example'
+    statInkName:
+      type: object
+      properties:
+        de_DE:
+          type: string
+        en_GB:
+          type: string
+        en_US:
+          type: string
+        es_ES:
+          type: string
+        es_MX:
+          type: string
+        fr_CA:
+          type: string
+        fr_FR:
+          type: string
+        it_IT:
+          type: string
+        ja_JP:
+          type: string
+        nl_NL:
+          type: string
+        ru_RU:
+          type: string
+        zh_CN:
+          type: string
+        zh_TW:
+          type: string
+      example:
+        de_DE: Rangkampf
+        en_GB: Ranked Battle
+        en_US: Ranked Battle
+        es_ES: Combate competitivo
+        es_MX: Combate competitivo
+        fr_CA: Match pro
+        fr_FR: Match pro
+        it_IT: Partita pro
+        ja_JP: ガチマッチ
+        nl_NL: Profgevecht
+        ru_RU: Бой элиты
+        zh_CN: 排名比赛
+        zh_TW: 排名比賽
+    statInkMap:
+      example:
+        key: gachi
+        name:
+          $ref: '#/components/schemas/statInkName/example'
+        splatnet: 20
+        area: 2858
+        short_name:
+          $ref: '#/components/schemas/statInkName/example'
+        release_at:
+          $ref: '#/components/schemas/statInkTime/example'
+      allOf:
+      - $ref: '#/components/schemas/statInkKeyName'
+      - type: object
+        properties:
+          splatnet:
+            type: integer
+          area:
+            type: integer
+          release_at:
+            $ref: '#/components/schemas/statInkTime'
+          short_name:
+            $ref: '#/components/schemas/statInkName'
+    statInkWeapon:
+      example:
+        key: gachi
+        name:
+          $ref: '#/components/schemas/statInkName/example'
+        splatnet: 45
+        reskin_of: sshooter
+        main_ref: sshooter
+        type:
+          $ref: '#/components/schemas/statInkWeaponType/example'
+        sub:
+          $ref: '#/components/schemas/statInkKeyName/example'
+        special:
+          $ref: '#/components/schemas/statInkKeyName/example'
+        main_power_up:
+          $ref: '#/components/schemas/statInkKeyName/example'
+      allOf:
+      - $ref: '#/components/schemas/statInkKeyName'
+      - type: object
+        properties:
+          splatnet:
+            type: integer
+          type:
+            $ref: '#/components/schemas/statInkWeaponType'
+          reskin_of:
+            type: string
+          main_ref:
+            type: string
+          sub:
+            $ref: '#/components/schemas/statInkKeyName'
+          special:
+            $ref: '#/components/schemas/statInkKeyName'
+          main_power_up:
+            $ref: '#/components/schemas/statInkKeyName'
+    statInkWeaponType:
+      example:
+        key: gachi
+        name:
+          $ref: '#/components/schemas/statInkName/example'
+        category:
+          $ref: '#/components/schemas/statInkKeyName/example'
+      allOf:
+      - $ref: '#/components/schemas/statInkKeyName'
+      - type: object
+        properties:
+          category:
+            $ref: '#/components/schemas/statInkKeyName'
+    statInkFreshness:
+      type: object
+      properties:
+        freshness:
+          type: number
+        title:
+          $ref: '#/components/schemas/statInkName'
+      example:
+        freshness: 99.5
+        title:
+          $ref: '#/components/schemas/statInkName/example'
+    statInkRank:
+      example:
+        key: a-
+        name:
+          $ref: '#/components/schemas/statInkName/example'
+        zone:
+          $ref: '#/components/schemas/statInkKeyName/example'
+      allOf:
+      - $ref: '#/components/schemas/statInkKeyName'
+      - type: object
+        properties:
+          zone:
+            $ref: '#/components/schemas/statInkKeyName'
+    statInkGender:
+      type: object
+      properties:
+        key:
+          type: string
+        name:
+          $ref: '#/components/schemas/statInkName'
+        iso5218:
+          type: integer
+      example:
+        key: girl
+        name:
+          $ref: '#/components/schemas/statInkName/example'
+        iso5218: 2
+    statInkGears:
+      type: object
+      properties:
+        headgear:
+          $ref: '#/components/schemas/statInkClothes'
+        clothing:
+          $ref: '#/components/schemas/statInkClothes'
+        shoes:
+          $ref: '#/components/schemas/statInkClothes'
+      example:
+        headgear:
+          $ref: '#/components/schemas/statInkClothes/example'
+        clothing:
+          $ref: '#/components/schemas/statInkClothes/example'
+        shoes:
+          $ref: '#/components/schemas/statInkClothes/example'
+    statInkClothes:
+      type: object
+      properties:
+        gear:
+          $ref: '#/components/schemas/statInkGear'
+        primary_ability:
+          $ref: '#/components/schemas/statInkKeyName'
+        secondary_abilities:
+          maxItems: 3
+          type: array
+          items:
+            $ref: '#/components/schemas/statInkKeyName'
+      example:
+        gear:
+          $ref: '#/components/schemas/statInkGear/example'
+        primary_ability:
+          $ref: '#/components/schemas/statInkKeyName/example'
+        secondary_abilities:
+        - $ref: '#/components/schemas/statInkKeyName/example'
+    statInkGear:
+      example:
+        splatnet: 2002
+        key: striped_beanie
+        name:
+          $ref: '#/components/schemas/statInkName/example'
+        type:
+          $ref: '#/components/schemas/statInkName/example'
+        brand:
+          $ref: '#/components/schemas/statInkName/example'
+        primary_ability:
+          $ref: '#/components/schemas/statInkName/example'
+      allOf:
+      - $ref: '#/components/schemas/statInkKeyName'
+      - type: object
+        properties:
+          splatnet:
+            type: integer
+          type:
+            $ref: '#/components/schemas/statInkKeyName'
+          brand:
+            $ref: '#/components/schemas/statInkKeyName'
+          primary_ability:
+            $ref: '#/components/schemas/statInkKeyName'
+    statInkPlayer:
+      type: object
+      properties:
+        team:
+          type: string
+        is_me:
+          type: boolean
+        weapon:
+          $ref: '#/components/schemas/statInkWeapon'
+        level:
+          maximum: 99
+          minimum: 1
+          type: integer
+        rank:
+          allOf:
+          - $ref: '#/components/schemas/statInkRank'
+          - nullable: true
+        star_rank:
+          minimum: 0
+          type: integer
+        rank_in_team:
+          maximum: 4
+          minimum: 1
+          type: integer
+          nullable: true
+        kill:
+          minimum: 0
+          type: integer
+        death:
+          minimum: 0
+          type: integer
+        kill_or_assist:
+          minimum: 0
+          type: integer
+        special:
+          minimum: 0
+          type: integer
+        my_kill:
+          type: object
+          nullable: true
+        point:
+          minimum: 0
+          type: integer
+        name:
+          type: string
+        species:
+          $ref: '#/components/schemas/statInkKeyName'
+        gender:
+          $ref: '#/components/schemas/statInkGender'
+        fest_title:
+          $ref: '#/components/schemas/statInkKeyName'
+        splatnet_id:
+          pattern: "^[A-Fa-f0-9]{16}$"
+          type: string
+        top_500:
+          type: boolean
+        icon:
+          type: string
+    statInkAgent:
+      type: object
+      properties:
+        name:
+          type: string
+        version:
+          type: string
+        game_version:
+          type: object
+          nullable: true
+        game_version_date:
+          type: object
+          nullable: true
+        custom:
+          type: object
+          nullable: true
+        variables:
+          allOf:
+          - $ref: '#/components/schemas/statInkVariables'
+          - nullable: true
+    statInkVariables:
+      type: object
+      properties:
+        upload_mode:
+          type: string
+    Shift:
+      required:
+      - job_id
+      - player_splatnet_id
+      - splatnet_upload
+      - stat_ink_upload
+      type: object
+      properties:
+        player_splatnet_id:
+          pattern: "^[A-Fa-f0-9]{16}$"
+          type: string
+        job_id:
+          minimum: 0
+          type: integer
+        splatnet_upload:
+          type: boolean
+        stat_ink_upload:
+          type: boolean
+        splatnet_json:
+          allOf:
+          - $ref: '#/components/schemas/splatnetShift'
+          - nullable: true
+        stat_ink_json:
+          allOf:
+          - $ref: '#/components/schemas/statInkShift'
+          - nullable: true
+        start_time:
+          minimum: 0
+          type: integer
+          nullable: true
+        play_time:
+          minimum: 0
+          type: integer
+        end_time:
+          minimum: 0
+          type: integer
+          nullable: true
+        danger_rate:
+          maximum: 200
+          minimum: 0
+          type: number
+        is_clear:
+          type: boolean
+        job_failure_reason:
+          type: string
+          enum:
+          - time_limit
+          - wipe_out
+        failure_wave:
+          maximum: 3
+          minimum: 1
+          type: integer
+          nullable: true
+        grade_point:
+          maximum: 999
+          minimum: 0
+          type: integer
+        grade_point_delta:
+          type: integer
+          enum:
+          - -20
+          - -10
+          - -5
+          - 0
+          - 20
+        job_score:
+          minimum: 0
+          type: integer
+          nullable: true
+        drizzler_count:
+          minimum: 0
+          type: integer
+        flyfish_count:
+          minimum: 0
+          type: integer
+        goldie_count:
+          minimum: 0
+          type: integer
+        griller_count:
+          minimum: 0
+          type: integer
+        maws_count:
+          minimum: 0
+          type: integer
+        scrapper_count:
+          minimum: 0
+          type: integer
+        steel_eel_count:
+          minimum: 0
+          type: integer
+        steelhead_count:
+          minimum: 0
+          type: integer
+        stinger_count:
+          minimum: 0
+          type: integer
+        stage:
+          type: string
+          enum:
+          - Salmonid Smokeyard
+          - Ruins of Ark Polaris
+          - Spawning Grounds
+          - Marooner's Bay
+          - Lost Outpost
+        player_name:
+          type: string
+        player_death_count:
+          minimum: 0
+          type: integer
+        player_revive_count:
+          minimum: 0
+          type: integer
+        player_golden_eggs:
+          minimum: 0
+          type: integer
+        player_power_eggs:
+          minimum: 0
+          type: integer
+        player_special:
+          type: string
+          enum:
+          - Splat-Bomb Launcher
+          - Sting Ray
+          - Inkjet
+          - Splashdown
+        player_title:
+          type: string
+          enum:
+          - Apprentice
+          - Part Timer
+          - Go Getter
+          - Overachiever
+          - Profreshional
+        player_species:
+          type: string
+          nullable: true
+          enum:
+          - inkling
+          - octoling
+        player_gender:
+          type: string
+          nullable: true
+          enum:
+          - boy
+          - girl
+        player_w1_specials:
+          maximum: 2
+          minimum: 0
+          type: integer
+        player_w2_specials:
+          maximum: 2
+          minimum: 0
+          type: integer
+          nullable: true
+        player_w3_specials:
+          maximum: 2
+          minimum: 0
+          type: integer
+          nullable: true
+        player_w1_weapon:
+          $ref: '#/components/schemas/salmonWeaponEnum'
+        player_w2_weapon:
+          allOf:
+          - $ref: '#/components/schemas/salmonWeaponEnum'
+          - nullable: true
+        player_w3_weapon:
+          allOf:
+          - $ref: '#/components/schemas/salmonWeaponEnum'
+          - nullable: true
+        player_drizzler_kills:
+          minimum: 0
+          type: integer
+        player_flyfish_kills:
+          minimum: 0
+          type: integer
+        player_goldie_kills:
+          minimum: 0
+          type: integer
+        player_griller_kills:
+          minimum: 0
+          type: integer
+        player_maws_kills:
+          minimum: 0
+          type: integer
+        player_scrapper_kills:
+          minimum: 0
+          type: integer
+        player_steel_eel_kills:
+          minimum: 0
+          type: integer
+        player_steelhead_kills:
+          minimum: 0
+          type: integer
+        player_stinger_kills:
+          minimum: 0
+          type: integer
+        teammate_0_splatnet_id:
+          pattern: "^[A-Fa-f0-9]{16}$"
+          type: string
+          nullable: true
+        teammate_0_name:
+          type: string
+          nullable: true
+        teammate_0_death_count:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_0_revive_count:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_0_golden_eggs:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_0_power_eggs:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_0_special:
+          type: string
+          nullable: true
+          enum:
+          - Splat-Bomb Launcher
+          - Sting Ray
+          - Inkjet
+          - Splashdown
+        teammate_0_species:
+          type: string
+          nullable: true
+          enum:
+          - inkling
+          - octoling
+        teammate_0_gender:
+          type: string
+          nullable: true
+          enum:
+          - boy
+          - girl
+        teammate_0_w1_specials:
+          maximum: 2
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_0_w2_specials:
+          maximum: 2
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_0_w3_specials:
+          maximum: 2
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_0_w1_weapon:
+          allOf:
+          - $ref: '#/components/schemas/salmonWeaponEnum'
+          - nullable: true
+        teammate_0_w2_weapon:
+          allOf:
+          - $ref: '#/components/schemas/salmonWeaponEnum'
+          - nullable: true
+        teammate_0_w3_weapon:
+          allOf:
+          - $ref: '#/components/schemas/salmonWeaponEnum'
+          - nullable: true
+        teammate_0_drizzler_kills:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_0_flyfish_kills:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_0_goldie_kills:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_0_griller_kills:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_0_maws_kills:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_0_scrapper_kills:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_0_steel_eel_kills:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_0_steelhead_kills:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_0_stinger_kills:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_1_splatnet_id:
+          pattern: "^[A-Fa-f0-9]{16}$"
+          type: string
+          nullable: true
+        teammate_1_name:
+          type: string
+          nullable: true
+        teammate_1_death_count:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_1_revive_count:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_1_golden_eggs:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_1_power_eggs:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_1_special:
+          type: string
+          nullable: true
+          enum:
+          - Splat-Bomb Launcher
+          - Sting Ray
+          - Inkjet
+          - Splashdown
+        teammate_1_species:
+          type: string
+          nullable: true
+          enum:
+          - inkling
+          - octoling
+        teammate_1_gender:
+          type: string
+          nullable: true
+          enum:
+          - boy
+          - girl
+        teammate_1_w1_specials:
+          maximum: 2
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_1_w2_specials:
+          maximum: 2
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_1_w3_specials:
+          maximum: 2
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_1_w1_weapon:
+          allOf:
+          - $ref: '#/components/schemas/salmonWeaponEnum'
+          - nullable: true
+        teammate_1_w2_weapon:
+          allOf:
+          - $ref: '#/components/schemas/salmonWeaponEnum'
+          - nullable: true
+        teammate_1_w3_weapon:
+          allOf:
+          - $ref: '#/components/schemas/salmonWeaponEnum'
+          - nullable: true
+        teammate_1_drizzler_kills:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_1_flyfish_kills:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_1_goldie_kills:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_1_griller_kills:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_1_maws_kills:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_1_scrapper_kills:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_1_steel_eel_kills:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_1_steelhead_kills:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_1_stinger_kills:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_2_splatnet_id:
+          pattern: "^[A-Fa-f0-9]{16}$"
+          type: string
+          nullable: true
+        teammate_2_name:
+          type: string
+          nullable: true
+        teammate_2_death_count:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_2_revive_count:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_2_golden_eggs:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_2_power_eggs:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_2_special:
+          type: string
+          nullable: true
+          enum:
+          - Splat-Bomb Launcher
+          - Sting Ray
+          - Inkjet
+          - Splashdown
+        teammate_2_species:
+          type: string
+          nullable: true
+          enum:
+          - inkling
+          - octoling
+        teammate_2_gender:
+          type: string
+          nullable: true
+          enum:
+          - boy
+          - girl
+        teammate_2_w1_specials:
+          maximum: 2
+          minimum: 0
+          type: integer
+        teammate_2_w2_specials:
+          maximum: 2
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_2_w3_specials:
+          maximum: 2
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_2_w1_weapon:
+          allOf:
+          - $ref: '#/components/schemas/salmonWeaponEnum'
+          - nullable: true
+        teammate_2_w2_weapon:
+          allOf:
+          - $ref: '#/components/schemas/salmonWeaponEnum'
+          - nullable: true
+        teammate_2_w3_weapon:
+          allOf:
+          - $ref: '#/components/schemas/salmonWeaponEnum'
+          - nullable: true
+        teammate_2_drizzler_kills:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_2_flyfish_kills:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_2_goldie_kills:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_2_griller_kills:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_2_maws_kills:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_2_scrapper_kills:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_2_steel_eel_kills:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_2_steelhead_kills:
+          minimum: 0
+          type: integer
+          nullable: true
+        teammate_2_stinger_kills:
+          minimum: 0
+          type: integer
+          nullable: true
+        schedule_end_time:
+          minimum: 0
+          type: integer
+          nullable: true
+        schedule_start_time:
+          minimum: 0
+          type: integer
+        schedule_weapon_0:
+          allOf:
+          - $ref: '#/components/schemas/salmonWeaponScheduleEnum'
+          - nullable: true
+        schedule_weapon_1:
+          allOf:
+          - $ref: '#/components/schemas/salmonWeaponScheduleEnum'
+          - nullable: true
+        schedule_weapon_2:
+          allOf:
+          - $ref: '#/components/schemas/salmonWeaponScheduleEnum'
+          - nullable: true
+        schedule_weapon_3:
+          allOf:
+          - $ref: '#/components/schemas/salmonWeaponScheduleEnum'
+          - nullable: true
+      example:
+        player_gender: boy
+        teammate_0_special: Splat-Bomb Launcher
+        teammate_0_w3_specials: 0
+        teammate_1_w3_specials: 1
+        teammate_0_flyfish_kills: 0
+        teammate_2_name: teammate_2_name
+        teammate_1_maws_kills: 0
+        teammate_2_species: inkling
+        teammate_0_death_count: 0
+        teammate_1_power_eggs: 0
+        teammate_1_death_count: 0
+        teammate_2_gender: boy
+        teammate_2_w3_specials: 0
+        teammate_2_griller_kills: 0
+        teammate_1_gender: boy
+        teammate_2_death_count: 0
+        player_title: Apprentice
+        player_griller_kills: 0
+        player_name: player_name
+        flyfish_count: 0
+        job_failure_reason: time_limit
+        teammate_2_w1_weapon: ""
+        player_steel_eel_kills: 0
+        failure_wave: 1
+        steel_eel_count: 0
+        teammate_2_steelhead_kills: 0
+        job_score: 0
+        player_w1_weapon: Sploosh-o-matic
+        teammate_2_w3_weapon: ""
+        player_w3_weapon: ""
+        teammate_0_goldie_kills: 0
+        teammate_0_griller_kills: 0
+        teammate_1_goldie_kills: 0
+        teammate_0_gender: boy
+        teammate_2_golden_eggs: 0
+        teammate_1_steel_eel_kills: 0
+        schedule_end_time: 0
+        teammate_2_stinger_kills: 0
+        teammate_0_golden_eggs: 0
+        teammate_0_name: teammate_0_name
+        schedule_start_time: 0
+        teammate_1_golden_eggs: 0
+        griller_count: 0
+        player_flyfish_kills: 0
+        teammate_1_w1_weapon: ""
+        teammate_1_w2_weapon: ""
+        teammate_2_flyfish_kills: 0
+        teammate_0_maws_kills: 0
+        player_special: Splat-Bomb Launcher
+        player_splatnet_id: player_splatnet_id
+        player_stinger_kills: 0
+        teammate_1_stinger_kills: 0
+        splatnet_upload: true
+        player_w1_specials: 1
+        teammate_1_special: Splat-Bomb Launcher
+        teammate_1_revive_count: 0
+        end_time: 0
+        teammate_1_name: teammate_1_name
+        grade_point_delta: 9
+        player_scrapper_kills: 0
+        stat_ink_upload: true
+        teammate_0_stinger_kills: 0
+        is_clear: true
+        stage: Salmonid Smokeyard
+        teammate_2_drizzler_kills: 0
+        drizzler_count: 0
+        teammate_0_w2_specials: 1
+        teammate_2_w2_specials: 1
+        teammate_0_w3_weapon: ""
+        teammate_1_flyfish_kills: 0
+        teammate_1_w2_specials: 1
+        teammate_1_steelhead_kills: 0
+        schedule_weapon_3: ""
+        danger_rate: 112.7475331326665610731652122922241687774658203125
+        player_w2_specials: 1
+        teammate_0_steel_eel_kills: 0
+        schedule_weapon_1: ""
+        schedule_weapon_2: ""
+        teammate_1_scrapper_kills: 0
+        maws_count: 0
+        schedule_weapon_0: ""
+        teammate_1_griller_kills: 0
+        player_power_eggs: 0
+        teammate_2_special: Splat-Bomb Launcher
+        teammate_0_species: inkling
+        player_maws_kills: 0
+        teammate_0_drizzler_kills: 0
+        player_steelhead_kills: 0
+        start_time: 0
+        teammate_2_goldie_kills: 0
+        splatnet_json: ""
+        teammate_2_maws_kills: 0
+        teammate_2_power_eggs: 0
+        teammate_0_w2_weapon: ""
+        player_revive_count: 0
+        stinger_count: 0
+        teammate_1_species: inkling
+        teammate_1_w3_weapon: ""
+        goldie_count: 0
+        grade_point: 705
+        player_golden_eggs: 0
+        player_w3_specials: 1
+        player_drizzler_kills: 0
+        teammate_0_w1_specials: 1
+        teammate_2_w1_specials: 1
+        teammate_2_splatnet_id: teammate_2_splatnet_id
+        steelhead_count: 0
+        stat_ink_json: ""
+        teammate_1_w1_specials: 0
+        teammate_2_steel_eel_kills: 0
+        teammate_0_power_eggs: 0
+        player_species: inkling
+        teammate_0_scrapper_kills: 0
+        teammate_2_w2_weapon: ""
+        player_goldie_kills: 0
+        player_death_count: 0
+        teammate_0_splatnet_id: teammate_0_splatnet_id
+        teammate_0_revive_count: 0
+        teammate_1_splatnet_id: teammate_1_splatnet_id
+        teammate_1_drizzler_kills: 0
+        play_time: 0
+        player_w2_weapon: ""
+        job_id: 0
+        teammate_0_w1_weapon: ""
+        teammate_2_scrapper_kills: 0
+        teammate_2_revive_count: 0
+        scrapper_count: 0
+        teammate_0_steelhead_kills: 0
+    splatnetShift:
+      type: object
+      properties:
+        danger_rate:
+          maximum: 200
+          minimum: 0
+          type: number
+        job_result:
+          $ref: '#/components/schemas/splatnetJobResult'
+        job_score:
+          minimum: 0
+          type: integer
+        job_rate:
+          maximum: 435
+          minimum: 90
+          type: integer
+        grade_point:
+          maximum: 999
+          minimum: 0
+          type: integer
+        grade_point_delta:
+          type: integer
+          enum:
+          - -20
+          - -10
+          - -5
+          - 0
+          - 20
+        other_results:
+          maxItems: 3
+          type: array
+          items:
+            $ref: '#/components/schemas/splatnetShiftPlayer'
+        kuma_point:
+          type: integer
+        start_time:
+          minimum: 0
+          type: integer
+        player_type:
+          $ref: '#/components/schemas/playerType'
+        play_time:
+          minimum: 0
+          type: integer
+        boss_counts:
+          $ref: '#/components/schemas/bossCounts'
+        end_time:
+          minimum: 0
+          type: integer
+        my_result:
+          $ref: '#/components/schemas/splatnetShiftPlayer'
+        wave_details:
+          maxItems: 3
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/wave'
+        grade:
+          $ref: '#/components/schemas/grade'
+        schedule:
+          $ref: '#/components/schemas/schedule'
+    splatnetJobResult:
+      type: object
+      properties:
+        is_clear:
+          type: boolean
+        failure_reason:
+          type: string
+          nullable: true
+          enum:
+          - time_limit
+          - wipe_out
+        failure_wave:
+          maximum: 3
+          minimum: 1
+          type: integer
+          nullable: true
+    splatnetShiftPlayer:
+      type: object
+      properties:
+        special_counts:
+          type: array
+          items:
+            type: integer
+        special:
+          $ref: '#/components/schemas/splatnetQuad'
+        pid:
+          pattern: "^[A-Fa-f0-9]{16}$"
+          type: string
+        player_type:
+          $ref: '#/components/schemas/playerType'
+        weapon_list:
+          maxItems: 3
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/weaponList'
+        name:
+          type: string
+        dead_count:
+          minimum: 0
+          type: integer
+        golden_ikura_num:
+          minimum: 0
+          type: integer
+        boss_kill_counts:
+          $ref: '#/components/schemas/bossCounts'
+        ikura_num:
+          minimum: 0
+          type: integer
+        help_count:
+          minimum: 0
+          type: integer
+    weaponList:
+      type: object
+      properties:
+        id:
+          type: string
+        weapon:
+          $ref: '#/components/schemas/shiftWeapon'
+    shiftWeapon:
+      allOf:
+      - $ref: '#/components/schemas/splatnetTriple'
+      - type: object
+        properties:
+          thumbnail:
+            type: string
+    bossCounts:
+      type: object
+      properties:
+        "3":
+          $ref: '#/components/schemas/boss'
+        "6":
+          $ref: '#/components/schemas/boss'
+        "9":
+          $ref: '#/components/schemas/boss'
+        "12":
+          $ref: '#/components/schemas/boss'
+        "13":
+          $ref: '#/components/schemas/boss'
+        "14":
+          $ref: '#/components/schemas/boss'
+        "15":
+          $ref: '#/components/schemas/boss'
+        "16":
+          $ref: '#/components/schemas/boss'
+        "21":
+          $ref: '#/components/schemas/boss'
+    boss:
+      type: object
+      properties:
+        boss:
+          $ref: '#/components/schemas/splatnetDouble'
+        count:
+          minimum: 0
+          type: integer
+    wave:
+      type: object
+      properties:
+        water_level:
+          $ref: '#/components/schemas/splatnetDouble'
+        event_type:
+          $ref: '#/components/schemas/splatnetDouble'
+        golden_ikura_num:
+          minimum: 0
+          type: integer
+        golden_ikura_pop_num:
+          minimum: 0
+          type: integer
+        ikura_num:
+          minimum: 0
+          type: integer
+        quota_num:
+          maximum: 25
+          minimum: 2
+          type: integer
+    grade:
+      type: object
+      properties:
+        id:
+          type: string
+        short_name:
+          type: string
+        long_name:
+          type: string
+        name:
+          type: string
+    schedule:
+      type: object
+      properties:
+        start_time:
+          minimum: 0
+          type: integer
+        weapons:
+          maxItems: 4
+          minItems: 4
+          type: array
+          items:
+            $ref: '#/components/schemas/weaponList'
+        end_time:
+          minimum: 0
+          type: integer
+        stage:
+          $ref: '#/components/schemas/stage'
+    stage:
+      type: object
+      properties:
+        image:
+          type: string
+        name:
+          type: string
+    statInkShift:
+      type: object
+      properties:
+        id:
+          minimum: 0
+          type: integer
+        uuid:
+          type: string
+          format: uuid
+        splatnet_number:
+          minimum: 0
+          type: integer
+        url:
+          type: string
+          format: uri
+        api_endpoint:
+          type: string
+          format: uri
+        user:
+          $ref: '#/components/schemas/statInkShiftUser'
+        stage:
+          $ref: '#/components/schemas/statInkTriple'
+        is_cleared:
+          type: boolean
+        fail_reason:
+          $ref: '#/components/schemas/statInkKeyName'
+        clear_waves:
+          maximum: 3
+          minimum: 0
+          type: integer
+        danger_rate:
+          pattern: "^((0\\.[0-9])|([1-9]\\.[0-9])|([1-9][0-9]\\.[0-9])|(1[0-9][0-9]\\\
+            .[0-9])|(200\\.0))$"
+          type: string
+        quota:
+          maxItems: 3
+          minItems: 1
+          type: array
+          items:
+            maximum: 25
+            minimum: 2
+            type: integer
+        title:
+          $ref: '#/components/schemas/statInkTitle'
+        title_exp:
+          maximum: 999
+          minimum: 0
+          type: integer
+        title_after:
+          $ref: '#/components/schemas/statInkTitle'
+        title_exp_after:
+          maximum: 999
+          minimum: 0
+          type: integer
+        boss_appearances:
+          maxItems: 9
+          type: array
+          items:
+            $ref: '#/components/schemas/statInkBossData'
+        waves:
+          maxItems: 3
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/statInkWave'
+        my_data:
+          $ref: '#/components/schemas/statInkShiftPlayer'
+        teammates:
+          maxItems: 3
+          type: array
+          items:
+            $ref: '#/components/schemas/statInkShiftPlayer'
+        agent:
+          $ref: '#/components/schemas/statInkSalmonAgent'
+        automated:
+          type: boolean
+        note:
+          type: object
+          nullable: true
+        link_url:
+          type: object
+          nullable: true
+        shift_start_at:
+          $ref: '#/components/schemas/statInkTime'
+        start_at:
+          $ref: '#/components/schemas/statInkTime'
+        end_at:
+          type: object
+          nullable: true
+        register_at:
+          $ref: '#/components/schemas/statInkTime'
+    statInkShiftUser:
+      type: object
+      properties:
+        id:
+          minimum: 0
+          type: integer
+        name:
+          type: string
+        screen_name:
+          type: string
+        url:
+          type: string
+          format: uri
+        salmon_url:
+          type: string
+          format: uri
+        battle_url:
+          type: string
+          format: uri
+        join_at:
+          $ref: '#/components/schemas/statInkTime'
+        profile:
+          $ref: '#/components/schemas/statInkProfile'
+        stats:
+          $ref: '#/components/schemas/statInkShiftStats'
+    statInkShiftStats:
+      type: object
+      properties:
+        work_count:
+          minimum: 0
+          type: integer
+        total_golden_eggs:
+          minimum: 0
+          type: integer
+        total_eggs:
+          minimum: 0
+          type: integer
+        total_rescued:
+          minimum: 0
+          type: integer
+        total_point:
+          minimum: 0
+          type: integer
+        as_of:
+          $ref: '#/components/schemas/statInkTime'
+        registered_at:
+          $ref: '#/components/schemas/statInkTime'
+    statInkTitle:
+      allOf:
+      - $ref: '#/components/schemas/statInkTriple'
+      - type: object
+        properties:
+          generic_name:
+            $ref: '#/components/schemas/statInkName'
+    statInkBossData:
+      type: object
+      properties:
+        boss:
+          $ref: '#/components/schemas/statInkBoss'
+        count:
+          minimum: 0
+          type: integer
+    statInkBoss:
+      allOf:
+      - $ref: '#/components/schemas/statInkTriple'
+      - type: object
+        properties:
+          splatnetStr:
+            type: string
+    statInkWave:
+      type: object
+      properties:
+        known_occurrence:
+          $ref: '#/components/schemas/statInkTriple'
+        water_level:
+          $ref: '#/components/schemas/statInkTriple'
+        golden_egg_quota:
+          maximum: 25
+          minimum: 2
+          type: integer
+        golden_egg_appearances:
+          minimum: 0
+          type: integer
+        golden_egg_delivered:
+          minimum: 0
+          type: integer
+        power_egg_collected:
+          minimum: 0
+          type: integer
+    statInkTriple:
+      allOf:
+      - $ref: '#/components/schemas/statInkKeyName'
+      - type: object
+        properties:
+          splatnet:
+            minimum: 0
+            type: integer
+    statInkShiftPlayer:
+      type: object
+      properties:
+        splatnet_id:
+          pattern: "^[A-Fa-f0-9]{16}$"
+          type: string
+        name:
+          type: string
+        special:
+          $ref: '#/components/schemas/statInkTriple'
+        rescue:
+          minimum: 0
+          type: integer
+        death:
+          minimum: 0
+          type: integer
+        golden_egg_delivered:
+          minimum: 0
+          type: integer
+        power_egg_collected:
+          minimum: 0
+          type: integer
+        species:
+          $ref: '#/components/schemas/statInkKeyName'
+        gender:
+          $ref: '#/components/schemas/statInkGender'
+        special_uses:
+          maxItems: 3
+          minItems: 1
+          type: array
+          items:
+            maximum: 2
+            minimum: 0
+            type: integer
+        weapons:
+          maxItems: 3
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/statInkTriple'
+        boss_kills:
+          maxItems: 9
+          type: array
+          items:
+            $ref: '#/components/schemas/statInkBossData'
+    statInkSalmonAgent:
+      type: object
+      properties:
+        name:
+          type: string
+        version:
+          type: string
+    salmonWeaponEnum:
+      type: string
+      enum:
+      - Sploosh-o-matic
+      - Splattershot Jr.
+      - Splash-o-matic
+      - Aerospray MG
+      - Splattershot
+      - .52 Gal
+      - N-ZAP '85
+      - Splattershot Pro
+      - .96 Gal
+      - Jet Squelcher
+      - Luna Blaster
+      - Blaster
+      - Range Blaster
+      - Clash Blaster
+      - Rapid Blaster
+      - Rapid Blaster Pro
+      - L-3 Nozzlenose
+      - H-3 Nozzlenose
+      - Squeezer
+      - Carbon Roller
+      - Splat Roller
+      - Dynamo Roller
+      - Flingza Roller
+      - Inkbrush
+      - Octobrush
+      - Classic Squiffer
+      - Splat Charger
+      - Splatterscope
+      - E-liter 4K
+      - E-liter 4K Scope
+      - Bamboozler 14 Mk I
+      - Goo Tuber
+      - Slosher
+      - Soda Slosher
+      - Tri-Slosher
+      - Sloshing Machine
+      - Bloblobber
+      - Explosher
+      - Mini Splatling
+      - Heavy Splatling
+      - Hydra Splatling
+      - Ballpoint Splatling
+      - Nautilus 47
+      - Dapple Dualies
+      - Splat Dualies
+      - Glooga Dualies
+      - Dualie Squelchers
+      - Dark Tetra Dualies
+      - Splat Brella
+      - Tenta Brella
+      - Undercover Brella
+      - Grizzco Blaster
+      - Grizzco Brella
+      - Grizzco Charger
+      - Grizzco Slosher
+    salmonWeaponScheduleEnum:
+      type: string
+      enum:
+      - Random Grizzco
+      - Random
+      - Sploosh-o-matic
+      - Splattershot Jr.
+      - Splash-o-matic
+      - Aerospray MG
+      - Splattershot
+      - .52 Gal
+      - N-ZAP '85
+      - Splattershot Pro
+      - .96 Gal
+      - Jet Squelcher
+      - Luna Blaster
+      - Blaster
+      - Range Blaster
+      - Clash Blaster
+      - Rapid Blaster
+      - Rapid Blaster Pro
+      - L-3 Nozzlenose
+      - H-3 Nozzlenose
+      - Squeezer
+      - Carbon Roller
+      - Splat Roller
+      - Dynamo Roller
+      - Flingza Roller
+      - Inkbrush
+      - Octobrush
+      - Classic Squiffer
+      - Splat Charger
+      - Splatterscope
+      - E-liter 4K
+      - E-liter 4K Scope
+      - Bamboozler 14 Mk I
+      - Goo Tuber
+      - Slosher
+      - Soda Slosher
+      - Tri-Slosher
+      - Sloshing Machine
+      - Bloblobber
+      - Explosher
+      - Mini Splatling
+      - Heavy Splatling
+      - Hydra Splatling
+      - Ballpoint Splatling
+      - Nautilus 47
+      - Dapple Dualies
+      - Splat Dualies
+      - Glooga Dualies
+      - Dualie Squelchers
+      - Dark Tetra Dualies
+      - Splat Brella
+      - Tenta Brella
+      - Undercover Brella
+    User:
+      type: object
+      properties:
+        id:
+          minimum: 0
+          type: integer
+        username:
+          type: string
+      example:
+        id: 0
+        username: username
+  requestBodies:
+    Battle:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Battle'
+      required: true
+    Shift:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Shift'
+      required: true
