@@ -1,0 +1,70 @@
+{{/* This file is part of SplatStatsGo.
+   *
+   * SplatStatsGo is free software: you can redistribute it and/or modify
+   * it under the terms of the GNU General Public License as published by
+   * the Free Software Foundation, either version 3 of the License, or
+   * (at your option) any later version.
+   *
+   * SplatStatsGo is distributed in the hope that it will be useful,
+   * but WITHOUT ANY WARRANTY; without even the implied warranty of
+   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   * GNU General Public License for more details.
+   *
+   * You should have received a copy of the GNU General Public License
+   * along with SplatStatsGo.  If not, see <https://www.gnu.org/licenses/>.
+   */}}
+
+{{ define "filters" }}
+    {{ $printer := .Utils.Printer}}
+    {{ $translate := .Utils.Translate }}
+    <div class="card darken-1">
+        <form action="" method="get">
+            <div class="card-content">
+                <h2 class="card-title">{{ call $translate "Filtering" $printer }}</h2>
+                <div>
+                    <label for="stage">{{ call $translate "Stage:" $printer }}</label>
+                    <select name="stage" id="stage">
+                        {{ range .Stages }}
+                            <option value="{{ . }}">{{ .GetDisplay $printer }}</option>
+                        {{ end }}
+                    </select>
+                </div>
+                <div>
+                    <label for="special">{{ call $translate "Special:" $printer }}</label>
+                    <select name="special" id="special">
+                        {{ range .Specials }}
+                            <option value="{{ . }}">{{ .GetDisplay $printer }}</option>
+                        {{ end }}
+                    </select>
+                </div>
+                <div>
+                    <label for="cleared">{{ call $translate "Result:" $printer }}</label>
+                    <select name="cleared" id="cleared">
+                        <option value="any">{{ call $translate "Any Result" $printer }}</option>
+                        <option value="t">{{ call $translate "Cleared" $printer }}</option>
+                        <option value="f">{{ call $translate "Failed" $printer }}</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="fail_reason">{{ call $translate "Failure Reason:" $printer }}</label>
+                    <select name="fail_reason" id="fail_reason">
+                        {{ range .FailureReasons }}
+                            <option value="{{ . }}">{{ .GetDisplay $printer }}</option>
+                        {{ end }}
+                    </select>
+                </div>
+                <div>
+                    <label for="from">{{ call $translate "From:" $printer }}</label>
+                    <input type="date" id="from" name="from" pattern="\d{4}-\d{2}-\d{2}" min="2017-07-21" max="{{ .CurrentDate }}">
+                </div>
+                <div>
+                    <label for="to">{{ call $translate "To:" $printer }}</label>
+                    <input type="date" id="to" name="to" pattern="\d{4}-\d{2}-\d{2}" min="2017-07-21" max="{{ .CurrentDate }}">
+                </div>
+            </div>
+            <div class="card-action">
+                <input class="btn waves-effect waves-light" type="submit" value="Filter">
+            </div>
+        </form>
+    </div>
+{{ end }}

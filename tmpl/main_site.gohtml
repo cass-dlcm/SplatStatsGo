@@ -1,0 +1,82 @@
+{{/* This file is part of SplatStatsGo.
+   *
+   * SplatStatsGo is free software: you can redistribute it and/or modify
+   * it under the terms of the GNU General Public License as published by
+   * the Free Software Foundation, either version 3 of the License, or
+   * (at your option) any later version.
+   *
+   * SplatStatsGo is distributed in the hope that it will be useful,
+   * but WITHOUT ANY WARRANTY; without even the implied warranty of
+   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   * GNU General Public License for more details.
+   *
+   * You should have received a copy of the GNU General Public License
+   * along with SplatStatsGo.  If not, see <https://www.gnu.org/licenses/>.
+   */}}
+
+{{ define "main" }}
+    <nav class="light-blue lighten-1" role="navigation">
+        <div class="nav-wrapper container"><a id="logo-container" href="#" class="brand-logo black-text">Splat Stats</a>
+            <!-- Dropdown Structure -->
+            <ul id='dropdown1' class='dropdown-content'>
+                <li><a href="/two_battles?rule=all&match_type=all&stage=all&rank=all&weapon=all">All Battles</a></li>
+                <li><a href="/two_salmon?special=all&stage=all&cleared=all&failreason=all">All Shifts</a></li>
+                {{ if .Utils.Auth.Authenticated }}
+                    <li><a href="/two_battles/{{ .Utils.Auth.UserId }}">Your Battles</a></li>
+                    <li><a href="/two_salmon/{{ .Utils.Auth.UserId }}">Your Shifts</a></li>
+                {{ end }}
+            </ul>
+            {{/* Dropdown Structure */}}
+            <ul id='dropdown_accounts' class='dropdown-content'>
+                {{ if .Utils.Auth.Authenticated }}
+                    <li><a href="/auth/logout">Logout</a></li>
+                {{ else }}
+                    <li><a href="/auth/account/login">Login</a></li>
+                    <li><a href="/auth/signup">Sign Up</a></li>
+                {{ end }}
+            </ul>
+            <ul class="right">
+                <li>
+                    {{/* Dropdown Trigger */}}
+                    <a class='dropdown-trigger black-text' href='#' data-target='dropdown1'>Splatoon 2</a>
+                </li>
+                <li>
+                    {{/* Dropdown Trigger */}}
+                    {{ if .Utils.Auth.Authenticated }}
+                        <a class='dropdown-trigger black-text' href="#" data-target='dropdown_accounts'>{{ .Auth.Username }}</a>
+                    {{ else }}
+                        <a class='dropdown-trigger black-text' href="#" data-target='dropdown_accounts'>User</a>
+                    {{ end }}
+                </li>
+            </ul>
+        <ul id="nav-mobile" class="sidenav">
+            <li><a href="/two_battles?rule=all&match_type=all&stage=all&rank=all&weapon=all">All Battles</a></li>
+            <li><a href="/two_salmon?special=all&stage=all&cleared=all&failreason=all">All Shifts</a></li>
+            {{ if .Utils.Auth.Authenticated }}
+                <li><a href="/two_battles/user/{{ .Utils.Auth.UserId }}">Your Battles</a></li>
+                <li><a href="/two_salmon/user/{{ .Utils.Auth.UserId }}">Your Shifts</a></li>
+                <li><a href="/auth/logout">Logout</a></li>
+            {{ else }}
+                <li><a href="/auth/account/login">Login</a></li>
+                <li><a href="/auth/signup">Sign Up</a></li>
+            {{ end }}
+        </ul>
+        <a href="#" data-target="nav-mobile" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+        </div>
+    </nav>
+
+    <div class="container">{{template "content" .}}</div>
+    {{/* Compiled and minified JavaScript */}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+    <script>
+    kofiWidgetOverlay.draw('cass_dlcm', {
+        'type': 'floating-chat',
+        'floating-chat.donateButton.text': 'Support Me',
+        'floating-chat.donateButton.background-color': '#00b9fe',
+        'floating-chat.donateButton.text-color': '#fff'
+    });
+    </script>
+    <script>M.AutoInit();</script>
+    {{template "aftercontent" .}}
+{{end}}

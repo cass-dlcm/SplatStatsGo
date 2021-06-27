@@ -33,5 +33,5 @@ func GetSecret(secretName string) string {
 	if err != nil {
 		panic(err)
 	}
-	return resp.Payload.String()
+	return string(resp.Payload.Data)
 }

@@ -1,0 +1,78 @@
+{{ define "filter" }}
+    {{ $printer := .Utils.Printer}}
+    {{ $translate := .Utils.Translate }}
+    <div class="card darken-1">
+        <form action="" method="get">
+            <div class="card-content">
+                <h2 class="card-title">Filtering</h2>
+                <div>
+                    <label for="rule">{{ call $translate "Rule:" $printer }}</label>
+                    <select name="rule" id="rule">
+                        {{ range .Rules }}
+                            <option value="{{ . }}">{{ .GetDisplay $printer }}</option>
+                        {{ end }}
+                    </select>
+                </div>
+                <div>
+                    <label for="match_type">{{ call $translate "Match Type:" $printer }}</label>
+                    <select name="match_type" id="match_type">
+                        {{ range .Lobbies }}
+                            <option value="{{ . }}">{{ .GetDisplay $printer }}</option>
+                        {{ end }}
+                    </select>
+                </div>
+                <div>
+                    <label for="rank">{{ call $translate "Rank:" $printer }}</label>
+                    <select name="rank" id="rank">
+                        {{ range .Ranks }}
+                            <option value="{{ . }}">{{ . }}</option>
+                        {{ end }}
+                    </select>
+                </div>
+                <div>
+                    <label for="weapon">{{ call $translate "Weapon:" $printer }}</label>
+                    <select name="weapon" id="weapon">
+                        {{ range .Weapons }}
+                            <option value="{{ . }}">{{ .GetDisplay $printer }}</option>
+                        {{ end }}
+                    </select>
+                </div>
+                <div>
+                    <label for="stage">{{ call $translate "Stage:" $printer }}</label>
+                    <select name="stage" id="stage">
+                        {{ range .Stages }}
+                            <option value="{{ . }}">{{ .GetDisplay $printer }}</option>
+                        {{ end }}
+                    </select>
+                </div>
+                <div>
+                    <label for="win">{{ call $translate "Result:" $printer }}</label>
+                    <select name="win" id="win">
+                        <option value="any">{{ call $translate "Any Result" $printer }}</option>
+                        <option value="t">{{ call $translate "Win" $printer }}</option>
+                        <option value="f">{{ call $translate "Lose" $printer }}</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="has_dc">{{ call $translate "Has Disconnected Player:" $printer }}</label>
+                    <select name="has_dc" id="has_dc">
+                        <option value="any">{{ call $translate "Any" $printer }}</option>
+                        <option value="t">{{ call $translate "Yes" $printer }}</option>
+                        <option value="f">{{ call $translate "No" $printer }}</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="from">{{ call $translate "From:" $printer }}</label>
+                    <input type="date" id="from" name="from" pattern="\d{4}-\d{2}-\d{2}" min="2017-07-21" max="{{ .CurrentDate }}">
+                </div>
+                <div>
+                    <label for="to">{{ call $translate "To:" $printer }}</label>
+                    <input type="date" id="to" name="to" pattern="\d{4}-\d{2}-\d{2}" min="2017-07-21" max="{{ .CurrentDate }}">
+                </div>
+            </div>
+            <div class="card-action">
+                <input class="btn waves-effect waves-light" type="submit" value="Filter">
+            </div>
+        </form>
+    </div>
+{{ end }}

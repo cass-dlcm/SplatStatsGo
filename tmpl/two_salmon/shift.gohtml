@@ -1,0 +1,146 @@
+{{/* This file is part of SplatStatsGo.
+   *
+   * SplatStatsGo is free software: you can redistribute it and/or modify
+   * it under the terms of the GNU General Public License as published by
+   * the Free Software Foundation, either version 3 of the License, or
+   * (at your option) any later version.
+   *
+   * SplatStatsGo is distributed in the hope that it will be useful,
+   * but WITHOUT ANY WARRANTY; without even the implied warranty of
+   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   * GNU General Public License for more details.
+   *
+   * You should have received a copy of the GNU General Public License
+   * along with SplatStatsGo.  If not, see <https://www.gnu.org/licenses/>.
+   */}}
+
+{{ define "head" }}
+{{ end }}
+
+{{ define "content" }}
+    {{ $printer := .Utils.Printer}}
+    {{ $translate := .Utils.Translate}}
+    <table>
+        <tr>
+            <th>{{ call $translate "SplatNet Job #" $printer }}</th>
+            <td>{{ .JobId }}</td>
+        </tr>
+        <tr>
+            <th>{{ call $translate "Stage" $printer }}</th>
+            <td>{{ .Stage.GetDisplay $printer }}</td>
+        </tr>
+        <tr>
+            <th>{{ call $translate "Result" $printer }}</th>
+            <td>{{ .Result }}</td>
+        </tr>
+        <tr>
+            <th>{{ call $translate "Title" $printer }}</th>
+            <td>{{ .Title.GetDisplay $printer }} {{ .GradePoint }}</td>
+        </tr>
+        <tr>
+            <th>{{ call $translate "Hazard Level" $printer }}</th>
+            <td>{{ .DangerRate }}</td>
+        </tr>
+        <tr>
+            <th>{{ call $translate "Rotation" $printer }}</th>
+            {{ if .HasEndTime }}
+                <td>From {{ .ScheduleStartTime }} to {{ .ScheduleEndTime }}</td>
+            {{ else }}
+                <td>Starts at {{ .ScheduleStartTime }}</td>
+            {{ end }}
+        </tr>
+        <tr>
+            <th>{{ call $translate "Job Start" $printer }}</th>
+            <td>{{ .PlayTime }}</td>
+        </tr>
+    </table>
+    <table>
+        <thead>
+            <tr>
+                <th>{{ call $translate "Wave" $printer }}</th>
+                <th>{{ call $translate "Event" $printer }}</th>
+                <th>{{ call $translate "Water Level" $printer }}</th>
+                <th>{{ call $translate "Quota" $printer }}</th>
+                <th>{{ call $translate "Delivers" $printer }}</th>
+                <th>{{ call $translate "Appearances" $printer }}</th>
+                <th>{{ call $translate "Power Eggs" $printer }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{ range .Waves }}
+                <tr>
+                    <td>{{ .Num }}</td>
+                    <td>{{ .Event.GetDisplay $printer }}</td>
+                    <td>{{ .WaterLevel.GetDisplay $printer }}</td>
+                    <td>{{ .Quota }}</td>
+                    <td>{{ .Delivers }}</td>
+                    <td>{{ .Appearances }}</td>
+                    <td>{{ .PowerEggs }}</td>
+                </tr>
+            {{ end }}
+        </tbody>
+    </table>
+    <table>
+        <thead>
+            <tr>
+                <th>{{ call $translate "Name" $printer }}</th>
+                <th>{{ call $translate "Wave 1 Weapon" $printer }}</th>
+                <th>{{ call $translate "Wave 2 Weapon" $printer }}</th>
+                <th>{{ call $translate "Wave 3 Weapon" $printer }}</th>
+                <th>{{ call $translate "Special" $printer }}</th>
+                <th>{{ call $translate "Special Usage" $printer }}</th>
+                <th>{{ call $translate "Rescues" $printer }}</th>
+                <th>{{ call $translate "Deaths" $printer }}</th>
+                <th>{{ call $translate "Golden Eggs" $printer }}</th>
+                <th>{{ call $translate "Power Eggs" $printer }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{ range $player := .Players }}
+                <tr>
+                    <td>{{ $player.Name }}</td>
+                    {{ range $weaponIndex := call $.Utils.MakeSlice 0 1 2 }}
+                        {{ $weaponsLen := len $player.Weapons}}
+                        {{ if lt $weaponIndex $weaponsLen }}
+                            {{ $weapon := index $player.Weapons $weaponIndex }}
+                            <td><img style="height: 30px;" alt="" src="/static/two_salmon/weapons/{{ $weapon }}.png">{{ $weapon.GetDisplay $printer }}</td>
+                        {{ else }}
+                            <td></td>
+                        {{ end }}
+                    {{ end }}
+                    <td>{{ $player.Special.GetDisplay $printer }}</td>
+                    <td>{{ range $specialCount :=  $player.Specials }}{{ $specialCount }} - {{ end }}</td>
+                    <td>{{ $player.Rescues }}</td>
+                    <td>{{ $player.Deaths }}</td>
+                    <td>{{ $player.Golden }}</td>
+                    <td>{{ $player.Power }}</td>
+                </tr>
+            {{ end }}
+        </tbody>
+    </table>
+    <table>
+        <thead>
+            <tr>
+                <th>{{ call $translate "Boss Name" $printer }}</th>
+                <th>{{ call $translate "Appearances" $printer }}</th>
+                {{ range .Names }}
+                    <th>{{ . }}</th>
+                {{ end }}
+            </tr>
+        </thead>
+        <tbody>
+            {{ range .Bosses }}
+                <tr>
+                    <td>{{ .Name.GetDisplay $printer }}</td>
+                    <td>{{ .Appearances }}</td>
+                    {{ range .Kills }}
+                        <td>{{ . }}</td>
+                    {{ end }}
+                </tr>
+            {{ end }}
+        </tbody>
+    </table>
+{{ end }}
+
+{{ define "aftercontent" }}
+{{ end }}

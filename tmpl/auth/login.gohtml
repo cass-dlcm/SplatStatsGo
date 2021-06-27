@@ -1,0 +1,37 @@
+{{/* This file is part of SplatStatsGo.
+   *
+   * SplatStatsGo is free software: you can redistribute it and/or modify
+   * it under the terms of the GNU General Public License as published by
+   * the Free Software Foundation, either version 3 of the License, or
+   * (at your option) any later version.
+   *
+   * SplatStatsGo is distributed in the hope that it will be useful,
+   * but WITHOUT ANY WARRANTY; without even the implied warranty of
+   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   * GNU General Public License for more details.
+   *
+   * You should have received a copy of the GNU General Public License
+   * along with SplatStatsGo.  If not, see <https://www.gnu.org/licenses/>.
+   */}}
+
+{{ define "head" }}
+<title>Login to SplatStats</title>
+{{ end }}
+
+
+{{ define "content" }}
+<h1>Login</h1>
+
+<p>Enter your credentials.</p>
+
+<form action="" method="post">
+    <label for="username">Username</label>
+    <input type="text" name="username" id="username" required>
+    <label for="password">Password</label>
+    <input type="password" name="password" id="password" required>
+    <button type="submit">Login</button>
+</form>
+{{ end }}
+
+{{ define "aftercontent" }}
+{{ end }}

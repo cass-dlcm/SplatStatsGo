@@ -1,0 +1,135 @@
+{{/* This file is part of SplatStatsGo.
+   *
+   * SplatStatsGo is free software: you can redistribute it and/or modify
+   * it under the terms of the GNU General Public License as published by
+   * the Free Software Foundation, either version 3 of the License, or
+   * (at your option) any later version.
+   *
+   * SplatStatsGo is distributed in the hope that it will be useful,
+   * but WITHOUT ANY WARRANTY; without even the implied warranty of
+   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   * GNU General Public License for more details.
+   *
+   * You should have received a copy of the GNU General Public License
+   * along with SplatStatsGo.  If not, see <https://www.gnu.org/licenses/>.
+   */}}
+
+{{ define "head" }}
+    <title>Splatoon 2 Battles</title>
+{{end}}
+
+{{ define "content" }}
+    {{ $printer := .Utils.Printer}}
+    {{ $translate := .Utils.Translate }}
+    <div class="row">
+        <h1>Splatoon 2 Battles</h1>
+        <div class="col s12 m4 l3">
+            {{ template "filter" . }}
+        </div>
+        <div class="col s12 m8 l9">
+            {{ if .HasBattles }}
+                <div class="card darken-1">
+                    <div class="card-content">
+                        <h2 class="card-title">Summary</h2>
+                        Win percentage: {{ .WinRate }}%
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Value</th>
+                                    <th>Min</th>
+                                    <th>Median</th>
+                                    <th>Mean</th>
+                                    <th>Max</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Kills</td>
+                                    <td>{{ .Kills.Min }}</td>
+                                    <td>{{ .Kills.Median }}</td>
+                                    <td>{{ .Kills.Mean }}</td>
+                                    <td>{{ .Kills.Max }} </td>
+                                </tr>
+                                <tr>
+                                    <td>Deaths</td>
+                                    <td>{{ .Deaths.Min }}</td>
+                                    <td>{{ .Deaths.Median }}</td>
+                                    <td>{{ .Deaths.Mean }}</td>
+                                    <td>{{ .Deaths.Max }} </td>
+                                </tr>
+                                <tr>
+                                    <td>Assists</td>
+                                    <td>{{ .Assists.Min }}</td>
+                                    <td>{{ .Assists.Median }}</td>
+                                    <td>{{ .Assists.Mean }}</td>
+                                    <td>{{ .Assists.Max }} </td>
+                                </tr>
+                                <tr>
+                                    <td>Specials</td>
+                                    <td>{{ .Specials.Min }}</td>
+                                    <td>{{ .Specials.Median }}</td>
+                                    <td>{{ .Specials.Mean }}</td>
+                                    <td>{{ .Specials.Max }} </td>
+                                </tr>
+                                <tr>
+                                    <td>Inked</td>
+                                    <td>{{ .Inked.Min }}</td>
+                                    <td>{{ .Inked.Median }}</td>
+                                    <td>{{ .Inked.Mean }}</td>
+                                    <td>{{ .Inked.Max }} </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="pagination card darken-1">
+                    <div class="card-content">
+                        <h2 class="card-title">Battles</h2>
+                        <span class="step-links">
+                            {{ if .Nav.HasPrev }}
+                                <a class="blue-text text-darken-4" href="?sort={{ .Nav.Sort }}&startAt=0&endAt=50&{{ .Nav.Query }}&{{ .Nav.Time }}">&larr; first</a>
+                                <a class="blue-text text-darken-4" href="?sort={{ .Nav.Sort }}&startAt={{ .Nav.PrevPage.StartAt }}&endAt={{ .Nav.PrevPage.EndAt }}&{{ .Nav.Query }}&{{ .Nav.Time }}">previous</a>
+                            {{ end }}
+                            <span class="current">
+                                Battles {{ .Nav.CurrentPage.StartAt }} to {{ .Nav.CurrentPage.EndAt }}.
+                            </span>
+                            {{ if .Nav.HasNext }}
+                                <a class="blue-text text-darken-4" href="?sort={{ .Nav.Sort }}&startAt={{ .Nav.NextPage.StartAt }}&endAt={{ .Nav.NextPage.EndAt }}&{{ .Nav.Query }}&{{ .Nav.Time }}">next</a>
+                                <a class="blue-text text-darken-4" href="?sort={{ .Nav.Sort }}&startAt={{ .Nav.LastPage.StartAt }}&endAt={{ .Nav.LastPage.EndAt }}&{{ .Nav.Query }}&{{ .Nav.Time }}">last &rarr;</a>
+                            {{ end }}
+                        </span>
+                        <table>
+                            <tr>
+                                <th>User</th>
+                                <th>Splatnet #</th>
+                                <th>Mode</th>
+                                <th>Stage</th>
+                                <th>Weapon</th>
+                                <th>Result</th>
+                                <th>k/d</th>
+                                <th>Time</th>
+                            </tr>
+                        {{ range .BattleSummaries }}
+                            <tr>
+                                <td>{{ .PlayerName }}</td>
+                                <td><a class="blue-text text-darken-4" href="/two_battles/{{ .UserId }}/{{ .BattleNumber }}/">{{ .BattleNumber }}</a></td>
+                                <td>{{ .Rule }}</td>
+                                <td>{{ .Stage }}</td>
+                                <td><img style="height: 36px;" alt="" src="{{ .PlayerWeaponImage }}">{{ .PlayerWeapon }}</td>
+                                <td>{{ .Result }}</td>
+                                <td>{{ .PlayerKills }}/{{ .PlayerDeaths }}</td>
+                                <td>{{ .Time }}</td>
+                            </tr>
+                        {{ end }}
+                        </table>
+                    </div>
+                </div>
+            {{ else }}
+                <p>No battles are available.</p>
+            {{ end }}
+        </div>
+    </div>
+{{end}}
+
+{{define "aftercontent"}}
+{{end}}

@@ -1,0 +1,11 @@
+.main {
+    height: 30px;
+    border-radius: 50%;
+    background: #404040;
+}
+
+.sub {
+    height: 24px;
+    border-radius: 50%;
+    background: #404040;
+}

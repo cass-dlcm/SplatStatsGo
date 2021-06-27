@@ -1,0 +1,159 @@
+{{/* This file is part of SplatStatsGo.
+   *
+   * SplatStatsGo is free software: you can redistribute it and/or modify
+   * it under the terms of the GNU General Public License as published by
+   * the Free Software Foundation, either version 3 of the License, or
+   * (at your option) any later version.
+   *
+   * SplatStatsGo is distributed in the hope that it will be useful,
+   * but WITHOUT ANY WARRANTY; without even the implied warranty of
+   * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   * GNU General Public License for more details.
+   *
+   * You should have received a copy of the GNU General Public License
+   * along with SplatStatsGo.  If not, see <https://www.gnu.org/licenses/>.
+   */}}
+
+{{ define "head" }}
+    <title>{{"Splatoon 2 Salmon Run Shifts"}}</title>
+{{end}}
+
+{{ define "content" }}
+    {{ $printer := .Utils.Printer}}
+    {{ $translate := .Utils.Translate }}
+    <div class="row">
+        <h1>{{"Splatoon 2 Salmon Run Shifts"}}</h1>
+        <div class="col s12 m4 l3">
+            {{ template "filters" . }}
+
+        </div>
+        <div class="col s12 m8 l9">
+            {{ if .HasShifts }}
+                <div class="card darken-1">
+                        <div class="card-content">
+                            <h2 class="card-title">{{"Summary"}}</h2>
+                            {{"Clear percentage:"}} {{ .ClearPercent }}%
+                            <br>
+                            {{"Wave 2 clear percentage:"}} {{ .WaveTwoPercent }}%
+                            <br>
+                            {{"Wave 1 clear percentage:"}} {{ .WaveOnePercent }}%
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Value</th>
+                                        <th>Min</th>
+                                        <th>Median</th>
+                                        <th>Mean</th>
+                                        <th>Max</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>{{"Player Golden Eggs"}}</td>
+                                        <td>{{ .PlayerGoldenEggs.Min }}</td>
+                                        <td>{{ .PlayerGoldenEggs.Median }}</td>
+                                        <td>{{ .PlayerGoldenEggs.Mean }}</td>
+                                        <td>{{ .PlayerGoldenEggs.Max }} </td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{"Team Golden Eggs"}}</td>
+                                        <td>{{ .TeamGoldenEggs.Min }}</td>
+                                        <td>{{ .TeamGoldenEggs.Median }}</td>
+                                        <td>{{ .TeamGoldenEggs.Mean }}</td>
+                                        <td>{{ .TeamGoldenEggs.Max }} </td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{"Player Power Eggs"}}</td>
+                                        <td>{{ .PlayerPowerEggs.Min }}</td>
+                                        <td>{{ .PlayerPowerEggs.Median }}</td>
+                                        <td>{{ .PlayerPowerEggs.Mean }}</td>
+                                        <td>{{ .PlayerPowerEggs.Max }} </td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{"Team Power Eggs"}}</td>
+                                        <td>{{ .TeamPowerEggs.Min }}</td>
+                                        <td>{{ .TeamPowerEggs.Median }}</td>
+                                        <td>{{ .TeamPowerEggs.Mean }}</td>
+                                        <td>{{ .TeamPowerEggs.Max }} </td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{"Player Revives"}}</td>
+                                        <td>{{ .PlayerRevives.Min }}</td>
+                                        <td>{{ .PlayerRevives.Median }}</td>
+                                        <td>{{ .PlayerRevives.Mean }}</td>
+                                        <td>{{ .PlayerRevives.Max }} </td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{"Player Deaths"}}</td>
+                                        <td>{{ .PlayerDeaths.Min }}</td>
+                                        <td>{{ .PlayerDeaths.Median }}</td>
+                                        <td>{{ .PlayerDeaths.Mean }}</td>
+                                        <td>{{ .PlayerDeaths.Max }} </td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{"Hazard Level"}}</td>
+                                        <td>{{ .DangerRate.Min }}</td>
+                                        <td>{{ .DangerRate.Median }}</td>
+                                        <td>{{ .DangerRate.Mean }}</td>
+                                        <td>{{ .DangerRate.Max }} </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </form>
+                </div>
+                <div class="pagination card darken-1">
+                    <div class="card-content">
+                        <h2 class="card-title">Shifts</h2>
+                        <span class="step-links">
+                            {{ if .Nav.HasPrev }}
+                                <a class="blue-text text-darken-4" href="?sort={{ .Nav.Sort }}&startAt=0&endAt=50&{{ .Nav.Query }}&{{ .Nav.Time }}">&larr; first</a>
+                                <a class="blue-text text-darken-4" href="?sort={{ .Nav.Sort }}&startAt={{ .Nav.PrevPage.StartAt }}&endAt={{ .Nav.PrevPage.EndAt }}&{{ .Nav.Query }}&{{ .Nav.Time }}">previous</a>
+                            {{ end }}
+                            <span class="current">
+                                Shifts {{ .Nav.CurrentPage.StartAt }} to {{ .Nav.CurrentPage.EndAt }}.
+                            </span>
+                            {{ if .Nav.HasNext }}
+                                <a class="blue-text text-darken-4" href="?sort={{ .Nav.Sort }}&startAt={{ .Nav.NextPage.StartAt }}&endAt={{ .Nav.NextPage.EndAt }}&{{ .Nav.Query }}&{{ .Nav.Time }}">next</a>
+                                <a class="blue-text text-darken-4" href="?sort={{ .Nav.Sort }}&startAt={{ .Nav.LastPage.StartAt }}&endAt={{ .Nav.LastPage.EndAt }}&{{ .Nav.Query }}&{{ .Nav.Time }}">last &rarr;</a>
+                            {{ end }}
+                        </span>
+                        <table>
+                            <tr>
+                                <th>{{"User"}}</th>
+                                <th>{{"Splatnet #"}}</th>
+                                <th>{{"Stage"}}</th>
+                                <th>{{"Cleared?"}}</th>
+                                <th>{{"Player Golden"}}</th>
+                                <th>{{"Team Golden"}}</th>
+                                <th>{{"Team Power"}}</th>
+                                <th>{{"Hazard Level"}}</th>
+                                <th>{{"Title"}}</th>
+                                <th>{{"Date Time"}}</th>
+                            </tr>
+                        {{ range .ShiftSummaries }}
+                            <tr>
+                                <td>{{ .PlayerName }}</td>
+                                <td><a class="blue-text text-darken-4" href="/two_salmon/{{ .PlayerId }}/{{ .JobId }}/">{{ .JobId }}</a></td>
+                                <td>{{ .Stage.GetDisplay $printer }}</td>
+                                <td>{{ .IsClear }}</td>
+                                <td>{{ .PlayerGolden }}</td>
+                                <td>{{ .TeamGolden }}</td>
+                                <td>{{ .TeamPower }}</td>
+                                <td>{{ .DangerRate }}</td>
+                                <td>{{ .PlayerTitle.GetDisplay $printer }} {{ .GradePoint }}</td>
+                                <td>{{ .Time }}</td>
+                            </tr>
+                        {{ end }}
+                        </table>
+                    </div>
+                </div>
+            {{ else }}
+                <p>{{ $translate "No shifts are available." $printer }}</p>
+            {{ end }}
+        </div>
+    </div>
+{{end}}
+
+{{define "aftercontent"}}
+{{end}}
