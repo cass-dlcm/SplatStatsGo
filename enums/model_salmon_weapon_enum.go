@@ -114,7 +114,6 @@ func GetShiftWeapons() []SalmonWeaponEnum {
 	}
 }
 
-
 func (swe SalmonWeaponEnum) GetDisplay(printer *message.Printer) string {
 	switch swe {
 	case SalmonSplooshOMatic:

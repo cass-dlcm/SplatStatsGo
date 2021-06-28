@@ -22,7 +22,7 @@ import (
 )
 
 type ShiftResults struct {
-	Utils			 FuncUtils
+	Utils            FuncUtils
 	HasShifts        bool
 	Clears           int
 	Wave2Clears      int
@@ -61,7 +61,7 @@ type ShiftInfo struct {
 }
 
 type ShiftDetails struct {
-	Utils			  FuncUtils
+	Utils             FuncUtils
 	JobId             int64
 	Stage             enums.SalmonStageEnum
 	Result            string
@@ -69,7 +69,7 @@ type ShiftDetails struct {
 	GradePoint        int
 	DangerRate        float64
 	ScheduleStartTime time.Time
-	HasEndTime		  bool
+	HasEndTime        bool
 	ScheduleEndTime   time.Time
 	PlayTime          time.Time
 	Waves             []ShiftWave

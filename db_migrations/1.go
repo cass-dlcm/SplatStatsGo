@@ -52,9 +52,9 @@ func updateTable(objectTable string, columnList []string, values []interface{}, 
 			return err
 		}
 	}
-	_, err := db.Exec("UPDATE " + objectTable + " SET " + interweaveColumnsValues(columnList, values) + " WHERE " + column + " = '" + strings.Replace(value, "'", "''", -1)  + "';")
+	_, err := db.Exec("UPDATE " + objectTable + " SET " + interweaveColumnsValues(columnList, values) + " WHERE " + column + " = '" + strings.Replace(value, "'", "''", -1) + "';")
 	if err != nil {
-		log.Println("UPDATE " + objectTable + " SET " + interweaveColumnsValues(columnList, values) + " WHERE " + column + " = '" + strings.Replace(value, "'", "''", -1)  + "';")
+		log.Println("UPDATE " + objectTable + " SET " + interweaveColumnsValues(columnList, values) + " WHERE " + column + " = '" + strings.Replace(value, "'", "''", -1) + "';")
 		debug.PrintStack()
 		return err
 	}

@@ -47,7 +47,6 @@ func init() {
 	}
 }
 
-
 func readObjWithId(id int64, objectTable string) *sql.Row {
 	return db.QueryRow("SELECT * FROM " + objectTable + " WHERE pk = " + fmt.Sprint(id) + ";")
 }
@@ -307,6 +306,18 @@ func processValue(value interface{}) string {
 		return "'" + fmt.Sprint(strings.Replace(fmt.Sprint(value.(enums.SalmonWeaponScheduleSpecialEnum)), "'", "''", -1)) + "'"
 	case enums.BattleStatinkWeaponEnum:
 		return "'" + fmt.Sprint(strings.Replace(fmt.Sprint(value.(enums.BattleStatinkWeaponEnum)), "'", "''", -1)) + "'"
+	case enums.SalmonWaterLevel:
+		return "'" + fmt.Sprint(strings.Replace(fmt.Sprint(value.(enums.SalmonWaterLevel)), "'", "''", -1)) + "'"
+	case enums.SalmonEvent:
+		return "'" + fmt.Sprint(strings.Replace(fmt.Sprint(value.(enums.SalmonEvent)), "'", "''", -1)) + "'"
+	case enums.SalmonSpecial:
+		return "'" + fmt.Sprint(strings.Replace(fmt.Sprint(value.(enums.SalmonSpecial)), "'", "''", -1)) + "'"
+	case enums.Lobby:
+		return "'" + fmt.Sprint(strings.Replace(fmt.Sprint(value.(enums.Lobby)), "'", "''", -1)) + "'"
+	case enums.Rule:
+		return "'" + fmt.Sprint(strings.Replace(fmt.Sprint(value.(enums.Rule)), "'", "''", -1)) + "'"
+	case enums.FailureReasonEnum:
+		return "'" + fmt.Sprint(strings.Replace(fmt.Sprint(value.(enums.FailureReasonEnum)), "'", "''", -1)) + "'"
 	case time.Time:
 		return "'" + value.(time.Time).Format("2006-01-02 15:04:05") + "'"
 	case bool:
@@ -358,6 +369,24 @@ func processValue(value interface{}) string {
 			return "NULL"
 		} else {
 			return "'" + strings.Replace(fmt.Sprint(*(value.(*enums.BattleWeaponEnum))), "'", "''", -1) + "'"
+		}
+	case *enums.SalmonSpecial:
+		if value.(*enums.SalmonSpecial) == nil {
+			return "NULL"
+		} else {
+			return "'" + strings.Replace(fmt.Sprint(*(value.(*enums.SalmonSpecial))), "'", "''", -1) + "'"
+		}
+	case *enums.SalmonEvent:
+		if value.(*enums.SalmonEvent) == nil {
+			return "NULL"
+		} else {
+			return "'" + strings.Replace(fmt.Sprint(*(value.(*enums.SalmonEvent))), "'", "''", -1) + "'"
+		}
+	case *enums.SalmonWaterLevel:
+		if value.(*enums.SalmonWaterLevel) == nil {
+			return "NULL"
+		} else {
+			return "'" + strings.Replace(fmt.Sprint(*(value.(*enums.SalmonWaterLevel))), "'", "''", -1) + "'"
 		}
 	case *enums.FailureReasonEnum:
 		if value.(*enums.FailureReasonEnum) == nil {
@@ -416,7 +445,7 @@ func interweaveColumnsValues(columnList []string, values []interface{}) string {
 		resultString += columnList[i] + " = "
 		switch values[i].(type) {
 		case string:
-			resultString += "'" + strings.Replace(values[i].(string), "'", "''", 0) + "'"
+			resultString += "'" + strings.Replace(values[i].(string), "'", "''", -1) + "'"
 		case bool:
 			if values[i].(bool) {
 				resultString += "1"
@@ -450,63 +479,63 @@ func interweaveColumnsValuesCondition(columnList []string, values []interface{})
 				resultString += "true"
 			} else {
 				resultString += columnList[i] + " = "
-				resultString += "'" + strings.Replace(values[i].(string), "'", "''", 0) + "'"
+				resultString += "'" + strings.Replace(values[i].(string), "'", "''", -1) + "'"
 			}
 		case enums.Rule:
 			if values[i].(enums.Rule) == enums.AllRules {
 				resultString += "true"
 			} else {
 				resultString += columnList[i] + " = "
-				resultString += "'" + strings.Replace(fmt.Sprint(values[i].(enums.Rule)), "'", "''", 0) + "'"
+				resultString += "'" + strings.Replace(fmt.Sprint(values[i].(enums.Rule)), "'", "''", -1) + "'"
 			}
 		case enums.Lobby:
 			if values[i].(enums.Lobby) == enums.AnyLobby {
 				resultString += "true"
 			} else {
 				resultString += columnList[i] + " = "
-				resultString += "'" + strings.Replace(fmt.Sprint(values[i].(enums.Lobby)), "'", "''", 0) + "'"
+				resultString += "'" + strings.Replace(fmt.Sprint(values[i].(enums.Lobby)), "'", "''", -1) + "'"
 			}
 		case enums.Rank:
 			if values[i].(enums.Rank) == enums.AnyRank {
 				resultString += "true"
 			} else {
 				resultString += columnList[i] + " = "
-				resultString += "'" + strings.Replace(fmt.Sprint(values[i].(enums.Rank)), "'", "''", 0) + "'"
+				resultString += "'" + strings.Replace(fmt.Sprint(values[i].(enums.Rank)), "'", "''", -1) + "'"
 			}
 		case enums.BattleWeaponEnum:
 			if values[i].(enums.BattleWeaponEnum) == enums.AnyWeapon {
 				resultString += "true"
 			} else {
 				resultString += columnList[i] + " = "
-				resultString += "'" + strings.Replace(fmt.Sprint(values[i].(enums.BattleWeaponEnum)), "'", "''", 0) + "'"
+				resultString += "'" + strings.Replace(fmt.Sprint(values[i].(enums.BattleWeaponEnum)), "'", "''", -1) + "'"
 			}
 		case enums.BattleStage:
 			if values[i].(enums.BattleStage) == enums.AnyStage {
 				resultString += "true"
 			} else {
 				resultString += columnList[i] + " = "
-				resultString += "'" + strings.Replace(fmt.Sprint(values[i].(enums.BattleStage)), "'", "''", 0) + "'"
+				resultString += "'" + strings.Replace(fmt.Sprint(values[i].(enums.BattleStage)), "'", "''", -1) + "'"
 			}
 		case enums.SalmonStageEnum:
 			if values[i].(enums.SalmonStageEnum) == enums.AnySalmonStage {
 				resultString += "true"
 			} else {
 				resultString += columnList[i] + " = "
-				resultString += "'" + strings.Replace(fmt.Sprint(values[i].(enums.SalmonStageEnum)), "'", "''", 0) + "'"
+				resultString += "'" + strings.Replace(fmt.Sprint(values[i].(enums.SalmonStageEnum)), "'", "''", -1) + "'"
 			}
 		case enums.SalmonSpecial:
 			if values[i].(enums.SalmonSpecial) == enums.AnySalmonSpecial {
 				resultString += "true"
 			} else {
 				resultString += columnList[i] + " = "
-				resultString += "'" + strings.Replace(fmt.Sprint(values[i].(enums.SalmonSpecial)), "'", "''", 0) + "'"
+				resultString += "'" + strings.Replace(fmt.Sprint(values[i].(enums.SalmonSpecial)), "'", "''", -1) + "'"
 			}
 		case enums.FailureReasonEnum:
 			if values[i].(enums.FailureReasonEnum) == enums.AnyFailureReason {
 				resultString += "true"
 			} else {
 				resultString += columnList[i] + " = "
-				resultString += "'" + strings.Replace(fmt.Sprint(values[i].(enums.FailureReasonEnum)), "'", "''", 0) + "'"
+				resultString += "'" + strings.Replace(fmt.Sprint(values[i].(enums.FailureReasonEnum)), "'", "''", -1) + "'"
 			}
 		case enums.TrinaryBool:
 			if values[i].(enums.TrinaryBool) == enums.AnyBool {

@@ -74,7 +74,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	user := &db_objects.User{}
 	err := json.NewDecoder(r.Body).Decode(user)
 	if err != nil {
-		// If there is something wrong with the request body, return a 400 status\
+		// If there is something wrong with the request body, return a 400 status
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return

@@ -66,5 +66,5 @@ func (se *SalmonEvent) UnmarshalJSON(b []byte) error {
 	case cohock, fog, goldieSeek, grillerEvent, rush, mothership, waterLevels:
 		return nil
 	}
-	return errors.New("Invalid SalmonWaterLevel. Got: " + fmt.Sprint(*se))
+	return errors.New("Invalid SalmonEvent. Got: " + fmt.Sprint(*se))
 }

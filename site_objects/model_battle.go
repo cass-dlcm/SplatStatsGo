@@ -39,7 +39,7 @@ type BattleResults struct {
 	Ranks           []enums.Rank
 	Stages          []enums.BattleStage
 	CurrentDate     string
-	Utils 			FuncUtils
+	Utils           FuncUtils
 }
 
 type BattleQuery struct {
@@ -64,7 +64,7 @@ type BattleInfo struct {
 }
 
 type BattleDetails struct {
-	Utils 			  FuncUtils
+	Utils             FuncUtils
 	BattleNumber      int64
 	Rule              string
 	MatchType         string

@@ -52,12 +52,12 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	results := site_objects.BattleResults{
-		Rules:     enums.GetRule(),
-		Lobbies:   enums.GetLobby(),
-		Ranks:     enums.GetRanks(),
-		Weapons:   enums.GetBattleWeaponEnum(),
-		Stages:    enums.GetStages(),
-		Utils: 	site_objects.FuncUtils{
+		Rules:   enums.GetRule(),
+		Lobbies: enums.GetLobby(),
+		Ranks:   enums.GetRanks(),
+		Weapons: enums.GetBattleWeaponEnum(),
+		Stages:  enums.GetStages(),
+		Utils: site_objects.FuncUtils{
 			MakeSlice: common.MakeSlice,
 			Translate: common.Translate,
 		},
@@ -261,14 +261,14 @@ func IndexUser(w http.ResponseWriter, r *http.Request) {
 	}
 	results := site_objects.BattleResults{
 		Utils: site_objects.FuncUtils{
-			Translate:         common.Translate,
+			Translate: common.Translate,
 			MakeSlice: common.MakeSlice,
 		},
-		Rules:     enums.GetRule(),
-		Lobbies:   enums.GetLobby(),
-		Ranks:     enums.GetRanks(),
-		Weapons:   enums.GetBattleWeaponEnum(),
-		Stages:    enums.GetStages(),
+		Rules:   enums.GetRule(),
+		Lobbies: enums.GetLobby(),
+		Ranks:   enums.GetRanks(),
+		Weapons: enums.GetBattleWeaponEnum(),
+		Stages:  enums.GetStages(),
 		Nav: site_objects.Navigation{
 			Sort: sort,
 			CurrentPage: site_objects.Page{
@@ -543,9 +543,9 @@ func Detail(w http.ResponseWriter, r *http.Request) {
 		ElapsedTimeMinSec: elapsedTimeMinSec,
 		ElapsedTime:       (*battleObj).ElapsedTime,
 		Players:           make([]site_objects.PlayerDetails, playerCount),
-		Utils:			   site_objects.FuncUtils{
-			Translate:         common.Translate,
-			Printer:           printer,
+		Utils: site_objects.FuncUtils{
+			Translate: common.Translate,
+			Printer:   printer,
 		},
 	}
 	if user != nil {

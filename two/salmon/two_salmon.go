@@ -113,7 +113,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 			Query: salmonQueryStr,
 			Time:  timeStr,
 		},
-		Utils:			site_objects.FuncUtils{
+		Utils: site_objects.FuncUtils{
 			Translate: common.Translate,
 		},
 		CurrentDate:    time.Now().Format("2006-01-02"),
@@ -360,7 +360,7 @@ func IndexUser(w http.ResponseWriter, r *http.Request) {
 			Query: salmonQueryStr,
 			Time:  timeStr,
 		},
-		Utils: 			site_objects.FuncUtils{
+		Utils: site_objects.FuncUtils{
 			Translate: common.Translate,
 		},
 		CurrentDate:    time.Now().Format("2006-01-02"),
@@ -538,7 +538,6 @@ func IndexUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-
 func Detail(w http.ResponseWriter, r *http.Request) {
 	if detailTmpl == nil {
 		if err := initTemplates(); err != nil {
@@ -608,8 +607,8 @@ func Detail(w http.ResponseWriter, r *http.Request) {
 	}
 	shiftDetailsObj := site_objects.ShiftDetails{
 		Utils: site_objects.FuncUtils{
-			Printer:           printer,
-			Translate:         common.Translate,
+			Printer:   printer,
+			Translate: common.Translate,
 			MakeSlice: common.MakeSlice,
 		},
 		JobId:             shiftObj.JobId,
@@ -621,7 +620,7 @@ func Detail(w http.ResponseWriter, r *http.Request) {
 		ScheduleEndTime:   time.Time{},
 		PlayTime:          time.Unix(shiftObj.PlayTime, 0),
 		Names:             make([]string, playerCount),
-		Bosses:            []site_objects.ShiftBoss{
+		Bosses: []site_objects.ShiftBoss{
 			{Name: enums.Goldie, Appearances: shiftObj.GoldieCount},
 			{Name: enums.Steelhead, Appearances: shiftObj.SteelheadCount},
 			{Name: enums.Flyfish, Appearances: shiftObj.FlyfishCount},
@@ -632,8 +631,8 @@ func Detail(w http.ResponseWriter, r *http.Request) {
 			{Name: enums.Griller, Appearances: shiftObj.GrillerCount},
 			{Name: enums.Drizzler, Appearances: shiftObj.DrizzlerCount},
 		},
-		Players:           make([]site_objects.ShiftPlayer, playerCount),
-		Waves:             make([]site_objects.ShiftWave, waveCount),
+		Players: make([]site_objects.ShiftPlayer, playerCount),
+		Waves:   make([]site_objects.ShiftWave, waveCount),
 	}
 	if user != nil {
 		shiftDetailsObj.Utils.Auth.Authenticated = true

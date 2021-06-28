@@ -15,7 +15,7 @@ const (
 	leagueTeam Lobby = "league_team"
 	ranked     Lobby = "gachi"
 	private    Lobby = "private"
-	turfWar    Lobby = "turf_war"
+	regular    Lobby = "regular"
 	fesSolo    Lobby = "fes_solo"
 	fesTeam    Lobby = "fes_team"
 )
@@ -28,7 +28,7 @@ func (l *Lobby) UnmarshalJSON(b []byte) error {
 		panic(err)
 	}
 	switch *l {
-	case AnyLobby, leagueTeam, leaguePair, ranked, private, turfWar, fesSolo, fesTeam:
+	case AnyLobby, leagueTeam, leaguePair, ranked, private, regular, fesSolo, fesTeam:
 		return nil
 	}
 	return errors.New("Invalid enums.Lobby. Got: " + fmt.Sprint(*l))
@@ -36,7 +36,7 @@ func (l *Lobby) UnmarshalJSON(b []byte) error {
 
 func GetLobby() []Lobby {
 	return []Lobby{
-		AnyLobby, leaguePair, leagueTeam, ranked, private, turfWar, fesSolo, fesTeam,
+		AnyLobby, leaguePair, leagueTeam, ranked, private, regular, fesSolo, fesTeam,
 	}
 }
 
@@ -52,7 +52,7 @@ func (l Lobby) GetDisplay(printer *message.Printer) string {
 		return printer.Sprintf("Ranked Battle")
 	case private:
 		return printer.Sprintf("Private Battle")
-	case turfWar:
+	case regular:
 		return printer.Sprintf("Normal Battle")
 	case fesSolo:
 		return printer.Sprintf("Splatfest Solo/Pro")

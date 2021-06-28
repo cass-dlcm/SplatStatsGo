@@ -29,8 +29,8 @@ type Navigation struct {
 }
 
 type FuncUtils struct {
-	Printer           *message.Printer
-	Translate         func(string, *message.Printer) string
-	Auth              AuthInfo
-	MakeSlice		  func(...interface{}) []interface{}
+	Printer   *message.Printer
+	Translate func(string, *message.Printer) string
+	Auth      AuthInfo
+	MakeSlice func(...interface{}) []interface{}
 }

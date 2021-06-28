@@ -32,14 +32,14 @@ func AddBattle(w http.ResponseWriter, r *http.Request) {
 	sessionToken := r.Header.Get("session_token")
 	if sessionToken == "" {
 		log.Println("Session cookie not included")
-		w.Header().Set("WWW-Authenticate", "/api/v0-4-0/auth/signin")
+		w.Header().Set("WWW-Authenticate", "/api/auth/signin")
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 	user, err := obj_sql.CheckSessionToken(sessionToken)
 	if err != nil {
 		log.Println(err)
-		w.Header().Set("WWW-Authenticate", "/api/v0-4-0/auth/signin")
+		w.Header().Set("WWW-Authenticate", "/api/auth/signin")
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -52,7 +52,7 @@ func AddBattle(w http.ResponseWriter, r *http.Request) {
 	battle.UserId = *user
 	err = obj_sql.WriteNewBattle(&battle)
 	if fmt.Sprint(err) == "battle already exists" {
-		w.Header().Set("Location", "/api/v0-4-0/two_battles/"+fmt.Sprint(battle.UserId)+"/"+fmt.Sprint(battle.BattleNumber))
+		w.Header().Set("Location", "/api/two_battles/"+fmt.Sprint(battle.UserId)+"/"+fmt.Sprint(battle.BattleNumber))
 		w.WriteHeader(http.StatusFound)
 		return
 	}
@@ -62,7 +62,7 @@ func AddBattle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.Header().Set("Location", "/api/v0-4-0/two_battles/"+fmt.Sprint(battle.UserId)+"/"+fmt.Sprint(battle.BattleNumber))
+	w.Header().Set("Location", "/api/two_battles/"+fmt.Sprint(battle.UserId)+"/"+fmt.Sprint(battle.BattleNumber))
 	w.WriteHeader(http.StatusCreated)
 }
 

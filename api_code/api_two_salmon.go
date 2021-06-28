@@ -32,7 +32,7 @@ func AddShift(w http.ResponseWriter, r *http.Request) {
 	sessionToken := r.Header.Get("session_token")
 	if sessionToken == "" {
 		log.Println("Session cookie not included")
-		w.Header().Set("WWW-Authenticate", "/api/v0-4-0/auth/signin")
+		w.Header().Set("WWW-Authenticate", "/api/auth/signin")
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -40,7 +40,7 @@ func AddShift(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Called by AddShift(" + fmt.Sprint(w) + ", " + fmt.Sprint(r) + ")")
 		log.Println(err)
-		w.Header().Set("WWW-Authenticate", "/api/v0-4-0/auth/signin")
+		w.Header().Set("WWW-Authenticate", "/api/auth/signin")
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -54,7 +54,7 @@ func AddShift(w http.ResponseWriter, r *http.Request) {
 	shift.UserId = *user
 	err = obj_sql.WriteNewShift(&shift)
 	if fmt.Sprint(err) == "shift already exists" {
-		w.Header().Set("Location", "/api/v0-4-0/two_salmon/"+fmt.Sprint(shift.UserId)+"/"+fmt.Sprint(shift.JobId))
+		w.Header().Set("Location", "/api/two_salmon/"+fmt.Sprint(shift.UserId)+"/"+fmt.Sprint(shift.JobId))
 		w.WriteHeader(http.StatusFound)
 		return
 	}
@@ -65,7 +65,7 @@ func AddShift(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.Header().Set("Location", "/api/v0-4-0/two_salmon/"+fmt.Sprint(shift.UserId)+"/"+fmt.Sprint(shift.JobId))
+	w.Header().Set("Location", "/api/two_salmon/"+fmt.Sprint(shift.UserId)+"/"+fmt.Sprint(shift.JobId))
 	w.WriteHeader(http.StatusCreated)
 }
 
