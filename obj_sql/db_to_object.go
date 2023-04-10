@@ -1,15 +1,18 @@
 package obj_sql
 
 import (
+	"database/sql"
+	"encoding/base64"
 	"fmt"
 	"github.com/cass-dlcm/SplatStatsGo/api_objects"
 	"github.com/cass-dlcm/SplatStatsGo/db_objects"
 	"github.com/cass-dlcm/SplatStatsGo/enums"
 	"log"
 	"runtime/debug"
+	"time"
 )
 
-func GetBattlesLean(values []interface{}, conditionColumns []string, startAt, endAt int64, sort string) ([]api_objects.Battle, error) {
+func GetBattlesLean(values []interface{}, conditionColumns []string, startAt, endAt int64, sort string) ([]api_objects.Battle2, error) {
 	if endAt-startAt > 50 {
 		endAt = startAt + 50
 	}
@@ -17,11 +20,11 @@ func GetBattlesLean(values []interface{}, conditionColumns []string, startAt, en
 	if err != nil {
 		return nil, err
 	}
-	var battles []api_objects.Battle
+	var battles []api_objects.Battle2
 	if endAt-startAt < int64(len(pks)) {
-		battles = make([]api_objects.Battle, endAt-startAt)
+		battles = make([]api_objects.Battle2, endAt-startAt)
 	} else {
-		battles = make([]api_objects.Battle, len(pks))
+		battles = make([]api_objects.Battle2, len(pks))
 	}
 	for i := startAt; i < endAt && i < int64(len(pks)); i++ {
 		battle, err := GetBattleLeanPk(pks[i])
@@ -33,7 +36,7 @@ func GetBattlesLean(values []interface{}, conditionColumns []string, startAt, en
 	return battles, nil
 }
 
-func GetBattlesLeanUser(userId int64, values []interface{}, conditionColumns []string, startAt, endAt int64, sort string) ([]api_objects.Battle, error) {
+func GetBattlesLeanUser(userId int64, values []interface{}, conditionColumns []string, startAt, endAt int64, sort string) ([]api_objects.Battle2, error) {
 	if endAt-startAt > 50 {
 		endAt = startAt + 50
 	}
@@ -43,11 +46,11 @@ func GetBattlesLeanUser(userId int64, values []interface{}, conditionColumns []s
 	if err != nil {
 		return nil, err
 	}
-	var battles []api_objects.Battle
+	var battles []api_objects.Battle2
 	if endAt-startAt < int64(len(pks)) {
-		battles = make([]api_objects.Battle, endAt-startAt)
+		battles = make([]api_objects.Battle2, endAt-startAt)
 	} else {
-		battles = make([]api_objects.Battle, len(pks))
+		battles = make([]api_objects.Battle2, len(pks))
 	}
 	for i := startAt; i < endAt && i < int64(len(pks)); i++ {
 		battle, err := GetBattleLeanPk(pks[i])
@@ -59,7 +62,7 @@ func GetBattlesLeanUser(userId int64, values []interface{}, conditionColumns []s
 	return battles, nil
 }
 
-func GetShiftsLean(values []interface{}, conditionColumns []string, startAt, endAt int64, sort string) ([]api_objects.Shift, error) {
+func GetShiftsLean(values []interface{}, conditionColumns []string, startAt, endAt int64, sort string) ([]api_objects.Shift2, error) {
 	if endAt-startAt > 50 {
 		endAt = startAt + 50
 	}
@@ -67,11 +70,11 @@ func GetShiftsLean(values []interface{}, conditionColumns []string, startAt, end
 	if err != nil {
 		return nil, err
 	}
-	var shifts []api_objects.Shift
+	var shifts []api_objects.Shift2
 	if endAt-startAt < int64(len(pks)) {
-		shifts = make([]api_objects.Shift, endAt-startAt)
+		shifts = make([]api_objects.Shift2, endAt-startAt)
 	} else {
-		shifts = make([]api_objects.Shift, len(pks))
+		shifts = make([]api_objects.Shift2, len(pks))
 	}
 	for i := startAt; i < endAt && i < int64(len(pks)); i++ {
 		shift, err := GetShiftLeanPk(pks[i])
@@ -83,7 +86,7 @@ func GetShiftsLean(values []interface{}, conditionColumns []string, startAt, end
 	return shifts, nil
 }
 
-func GetBattlesUser(userId int64, values []interface{}, conditionColumns []string, startAt, endAt int64, sort string) ([]api_objects.Battle, error) {
+func GetBattlesUser(userId int64, values []interface{}, conditionColumns []string, startAt, endAt int64, sort string) ([]api_objects.Battle2, error) {
 	if endAt-startAt > 50 {
 		endAt = startAt + 50
 	}
@@ -93,11 +96,11 @@ func GetBattlesUser(userId int64, values []interface{}, conditionColumns []strin
 	if err != nil {
 		return nil, err
 	}
-	var battles []api_objects.Battle
+	var battles []api_objects.Battle2
 	if endAt-startAt < int64(len(pks)) {
-		battles = make([]api_objects.Battle, endAt-startAt)
+		battles = make([]api_objects.Battle2, endAt-startAt)
 	} else {
-		battles = make([]api_objects.Battle, len(pks))
+		battles = make([]api_objects.Battle2, len(pks))
 	}
 	for i := startAt; i < endAt; i++ {
 		battleTemp, err := GetBattlePk(pks[i])
@@ -109,7 +112,7 @@ func GetBattlesUser(userId int64, values []interface{}, conditionColumns []strin
 	return battles, nil
 }
 
-func GetShiftsUser(userId, startAt, endAt int64, sort string) ([]api_objects.Shift, error) {
+func GetShiftsUser(userId, startAt, endAt int64, sort string) ([]api_objects.Shift2, error) {
 	if endAt-startAt > 50 {
 		endAt = startAt + 50
 	}
@@ -117,11 +120,11 @@ func GetShiftsUser(userId, startAt, endAt int64, sort string) ([]api_objects.Shi
 	if err != nil {
 		return nil, err
 	}
-	var shifts []api_objects.Shift
+	var shifts []api_objects.Shift2
 	if endAt-startAt < int64(len(splatnetNums)) {
-		shifts = make([]api_objects.Shift, endAt-startAt)
+		shifts = make([]api_objects.Shift2, endAt-startAt)
 	} else {
-		shifts = make([]api_objects.Shift, len(splatnetNums))
+		shifts = make([]api_objects.Shift2, len(splatnetNums))
 	}
 	for i := startAt; i < endAt && i < int64(len(splatnetNums)); i++ {
 		shiftTemp, err := GetShift(userId, splatnetNums[i])
@@ -133,7 +136,7 @@ func GetShiftsUser(userId, startAt, endAt int64, sort string) ([]api_objects.Shi
 	return shifts, nil
 }
 
-func GetShiftsLeanUser(userId int64, values []interface{}, conditionColumns []string, startAt, endAt int64, sort string) ([]api_objects.Shift, error) {
+func GetShiftsLeanUser(userId int64, values []interface{}, conditionColumns []string, startAt, endAt int64, sort string) ([]api_objects.Shift2, error) {
 	if endAt-startAt > 50 {
 		endAt = startAt + 50
 	}
@@ -143,11 +146,11 @@ func GetShiftsLeanUser(userId int64, values []interface{}, conditionColumns []st
 	if err != nil {
 		return nil, err
 	}
-	var shifts []api_objects.Shift
+	var shifts []api_objects.Shift2
 	if endAt-startAt < int64(len(pks)) {
-		shifts = make([]api_objects.Shift, endAt-startAt)
+		shifts = make([]api_objects.Shift2, endAt-startAt)
 	} else {
-		shifts = make([]api_objects.Shift, len(pks))
+		shifts = make([]api_objects.Shift2, len(pks))
 	}
 	for i := startAt; i < endAt && i < int64(len(pks)); i++ {
 		shiftTemp, err := GetShiftLeanPk(pks[i])
@@ -159,343 +162,7 @@ func GetShiftsLeanUser(userId int64, values []interface{}, conditionColumns []st
 	return shifts, nil
 }
 
-func GetBattle(userId int64, splatnetNumber int64) (*api_objects.Battle, error) {
-	var battle db_objects.Battle
-	var pk int
-	if err := readObjWithUserSplatnet(userId, splatnetNumber, "two_battles_battle").Scan(
-		&pk, &battle.UserId, &battle.SplatnetJson, &battle.SplatnetUpload, &battle.StatInkJson, &battle.StatInkUpload,
-		&battle.SplatnetNumber, &battle.PlayerSplatnetId, &battle.ElapsedTime, &battle.HasDisconnectedPlayer,
-		&battle.LeaguePoint, &battle.MatchType, &battle.Rule, &battle.MyTeamCount, &battle.OtherTeamCount,
-		&battle.SplatfestPoint, &battle.SplatfestTitle, &battle.Stage, &battle.TagId, &battle.Time, &battle.Win,
-		&battle.WinMeter, &battle.Opponent0SplatnetId, &battle.Opponent0Name, &battle.Opponent0Rank,
-		&battle.Opponent0LevelStar, &battle.Opponent0Level, &battle.Opponent0Weapon, &battle.Opponent0Gender,
-		&battle.Opponent0Species, &battle.Opponent0Assists, &battle.Opponent0Deaths, &battle.Opponent0GamePaintPoint,
-		&battle.Opponent0Kills, &battle.Opponent0Specials, &battle.Opponent0Headgear, &battle.Opponent0HeadgearMain,
-		&battle.Opponent0HeadgearSub0, &battle.Opponent0HeadgearSub1, &battle.Opponent0HeadgearSub2,
-		&battle.Opponent0Clothes, &battle.Opponent0ClothesMain, &battle.Opponent0ClothesSub0,
-		&battle.Opponent0ClothesSub1, &battle.Opponent0ClothesSub2, &battle.Opponent0Shoes, &battle.Opponent0ShoesMain,
-		&battle.Opponent0ShoesSub0, &battle.Opponent0ShoesSub1, &battle.Opponent0ShoesSub2, &battle.Opponent1SplatnetId,
-		&battle.Opponent1Name, &battle.Opponent1Rank, &battle.Opponent1LevelStar, &battle.Opponent1Level,
-		&battle.Opponent1Weapon, &battle.Opponent1Gender, &battle.Opponent1Species, &battle.Opponent1Assists,
-		&battle.Opponent1Deaths, &battle.Opponent1GamePaintPoint, &battle.Opponent1Kills, &battle.Opponent1Specials,
-		&battle.Opponent1Headgear, &battle.Opponent1HeadgearMain, &battle.Opponent1HeadgearSub0,
-		&battle.Opponent1HeadgearSub1, &battle.Opponent1HeadgearSub2, &battle.Opponent1Clothes,
-		&battle.Opponent1ClothesMain, &battle.Opponent1ClothesSub0, &battle.Opponent1ClothesSub1,
-		&battle.Opponent1ClothesSub2, &battle.Opponent1Shoes, &battle.Opponent1ShoesMain, &battle.Opponent1ShoesSub0,
-		&battle.Opponent1ShoesSub1, &battle.Opponent1ShoesSub2, &battle.Opponent2SplatnetId, &battle.Opponent2Name,
-		&battle.Opponent2Rank, &battle.Opponent2LevelStar, &battle.Opponent2Level, &battle.Opponent2Weapon,
-		&battle.Opponent2Gender, &battle.Opponent2Species, &battle.Opponent2Assists, &battle.Opponent2Deaths,
-		&battle.Opponent2GamePaintPoint, &battle.Opponent2Kills, &battle.Opponent2Specials, &battle.Opponent2Headgear,
-		&battle.Opponent2HeadgearMain, &battle.Opponent2HeadgearSub0, &battle.Opponent2HeadgearSub1,
-		&battle.Opponent2HeadgearSub2, &battle.Opponent2Clothes, &battle.Opponent2ClothesMain,
-		&battle.Opponent2ClothesSub0, &battle.Opponent2ClothesSub1, &battle.Opponent2ClothesSub2,
-		&battle.Opponent2Shoes, &battle.Opponent2ShoesMain, &battle.Opponent2ShoesSub0, &battle.Opponent2ShoesSub1,
-		&battle.Opponent2ShoesSub2, &battle.Opponent3SplatnetId, &battle.Opponent3Name, &battle.Opponent3Rank,
-		&battle.Opponent3LevelStar, &battle.Opponent3Level, &battle.Opponent3Weapon, &battle.Opponent3Gender,
-		&battle.Opponent3Species, &battle.Opponent3Assists, &battle.Opponent3Deaths, &battle.Opponent3GamePaintPoint,
-		&battle.Opponent3Kills, &battle.Opponent3Specials, &battle.Opponent3Headgear, &battle.Opponent3HeadgearMain,
-		&battle.Opponent3HeadgearSub0, &battle.Opponent3HeadgearSub1, &battle.Opponent3HeadgearSub2,
-		&battle.Opponent3Clothes, &battle.Opponent3ClothesMain, &battle.Opponent3ClothesSub0,
-		&battle.Opponent3ClothesSub1, &battle.Opponent3ClothesSub2, &battle.Opponent3Shoes, &battle.Opponent3ShoesMain,
-		&battle.Opponent3ShoesSub0, &battle.Opponent3ShoesSub1, &battle.Opponent3ShoesSub2, &battle.Teammate0SplatnetId,
-		&battle.Teammate0Name, &battle.Teammate0Rank, &battle.Teammate0LevelStar, &battle.Teammate0Level,
-		&battle.Teammate0Weapon, &battle.Teammate0Gender, &battle.Teammate0Species, &battle.Teammate0Assists,
-		&battle.Teammate0Deaths, &battle.Teammate0GamePaintPoint, &battle.Teammate0Kills, &battle.Teammate0Specials,
-		&battle.Teammate0Headgear, &battle.Teammate0HeadgearMain, &battle.Teammate0HeadgearSub0,
-		&battle.Teammate0HeadgearSub1, &battle.Teammate0HeadgearSub2, &battle.Teammate0Clothes,
-		&battle.Teammate0ClothesMain, &battle.Teammate0ClothesSub0, &battle.Teammate0ClothesSub1,
-		&battle.Teammate0ClothesSub2, &battle.Teammate0Shoes, &battle.Teammate0ShoesMain, &battle.Teammate0ShoesSub0,
-		&battle.Teammate0ShoesSub1, &battle.Teammate0ShoesSub2, &battle.Teammate1SplatnetId, &battle.Teammate1Name,
-		&battle.Teammate1Rank, &battle.Teammate1LevelStar, &battle.Teammate1Level, &battle.Teammate1Weapon,
-		&battle.Teammate1Gender, &battle.Teammate1Species, &battle.Teammate1Assists, &battle.Teammate1Deaths,
-		&battle.Teammate1GamePaintPoint, &battle.Teammate1Kills, &battle.Teammate1Specials, &battle.Teammate1Headgear,
-		&battle.Teammate1HeadgearMain, &battle.Teammate1HeadgearSub0, &battle.Teammate1HeadgearSub1,
-		&battle.Teammate1HeadgearSub2, &battle.Teammate1Clothes, &battle.Teammate1ClothesMain,
-		&battle.Teammate1ClothesSub0, &battle.Teammate1ClothesSub1, &battle.Teammate1ClothesSub2,
-		&battle.Teammate1Shoes, &battle.Teammate1ShoesMain, &battle.Teammate1ShoesSub0, &battle.Teammate1ShoesSub1,
-		&battle.Teammate1ShoesSub2, &battle.Teammate2SplatnetId, &battle.Teammate2Name, &battle.Teammate2Rank,
-		&battle.Teammate2LevelStar, &battle.Teammate2Level, &battle.Teammate2Weapon, &battle.Teammate2Gender,
-		&battle.Teammate2Species, &battle.Teammate2Assists, &battle.Teammate2Deaths, &battle.Teammate2GamePaintPoint,
-		&battle.Teammate2Kills, &battle.Teammate2Specials, &battle.Teammate2Headgear, &battle.Teammate2HeadgearMain,
-		&battle.Teammate2HeadgearSub0, &battle.Teammate2HeadgearSub1, &battle.Teammate2HeadgearSub2,
-		&battle.Teammate2Clothes, &battle.Teammate2ClothesMain, &battle.Teammate2ClothesSub0,
-		&battle.Teammate2ClothesSub1, &battle.Teammate2ClothesSub2, &battle.Teammate2Shoes, &battle.Teammate2ShoesMain,
-		&battle.Teammate2ShoesSub0, &battle.Teammate2ShoesSub1, &battle.Teammate2ShoesSub2,
-		&battle.PlayerName, &battle.PlayerRank, &battle.PlayerLevelStar, &battle.PlayerLevel, &battle.PlayerWeapon,
-		&battle.PlayerGender, &battle.PlayerSpecies, &battle.PlayerAssists, &battle.PlayerDeaths,
-		&battle.PlayerGamePaintPoint, &battle.PlayerKills, &battle.PlayerSpecials, &battle.PlayerHeadgear,
-		&battle.PlayerHeadgearMain, &battle.PlayerHeadgearSub0, &battle.PlayerHeadgearSub1, &battle.PlayerHeadgearSub2,
-		&battle.PlayerClothes, &battle.PlayerClothesMain, &battle.PlayerClothesSub0, &battle.PlayerClothesSub1,
-		&battle.PlayerClothesSub2, &battle.PlayerShoes, &battle.PlayerShoesMain, &battle.PlayerShoesSub0,
-		&battle.PlayerShoesSub1, &battle.PlayerShoesSub2,
-	); err != nil {
-		return nil, err
-	}
-	var battleSplatnet *api_objects.BattleSplatnet
-	if battle.SplatnetJson != nil {
-		var err error
-		battleSplatnet, err = readBattleSplatnet(*battle.SplatnetJson)
-		if err != nil {
-			return nil, err
-		}
-	}
-	var battleStatInk *api_objects.BattleStatInk
-	if battle.StatInkJson != nil {
-		var err error
-		battleStatInk, err = readBattleStatInk(*battle.StatInkJson)
-		if err != nil {
-			return nil, err
-		}
-	}
-	hasDC := battle.HasDisconnectedPlayer != 0
-	win := battle.Win != 0
-	return &api_objects.Battle{
-		UserId:                  battle.UserId,
-		SplatnetJson:            battleSplatnet,
-		StatInkJson:             battleStatInk,
-		BattleNumber:            battle.SplatnetNumber,
-		PlayerSplatnetId:        battle.PlayerSplatnetId,
-		ElapsedTime:             battle.ElapsedTime,
-		HasDisconnectedPlayer:   hasDC,
-		LeaguePoint:             battle.LeaguePoint,
-		MatchType:               battle.MatchType,
-		Rule:                    battle.Rule,
-		MyTeamCount:             battle.MyTeamCount,
-		OtherTeamCount:          battle.OtherTeamCount,
-		SplatfestPoint:          battle.SplatfestPoint,
-		SplatfestTitle:          battle.SplatfestTitle,
-		Stage:                   battle.Stage,
-		TagId:                   battle.TagId,
-		Time:                    battle.Time,
-		Win:                     win,
-		WinMeter:                battle.WinMeter,
-		Opponent0SplatnetId:     battle.Opponent0SplatnetId,
-		Opponent0Name:           battle.Opponent0Name,
-		Opponent0Rank:           battle.Opponent0Rank,
-		Opponent0LevelStar:      battle.Opponent0LevelStar,
-		Opponent0Level:          battle.Opponent0Level,
-		Opponent0Weapon:         battle.Opponent0Weapon,
-		Opponent0Gender:         battle.Opponent0Gender,
-		Opponent0Species:        battle.Opponent0Species,
-		Opponent0Assists:        battle.Opponent0Assists,
-		Opponent0Deaths:         battle.Opponent0Deaths,
-		Opponent0GamePaintPoint: battle.Opponent0GamePaintPoint,
-		Opponent0Kills:          battle.Opponent0Kills,
-		Opponent0Specials:       battle.Opponent0Specials,
-		Opponent0Headgear:       battle.Opponent0Headgear,
-		Opponent0HeadgearMain:   battle.Opponent0HeadgearMain,
-		Opponent0HeadgearSub0:   battle.Opponent0HeadgearSub0,
-		Opponent0HeadgearSub1:   battle.Opponent0HeadgearSub1,
-		Opponent0HeadgearSub2:   battle.Opponent0HeadgearSub2,
-		Opponent0Clothes:        battle.Opponent0Clothes,
-		Opponent0ClothesMain:    battle.Opponent0ClothesMain,
-		Opponent0ClothesSub0:    battle.Opponent0ClothesSub0,
-		Opponent0ClothesSub1:    battle.Opponent0ClothesSub1,
-		Opponent0ClothesSub2:    battle.Opponent0ClothesSub2,
-		Opponent0Shoes:          battle.Opponent0Shoes,
-		Opponent0ShoesMain:      battle.Opponent0ShoesMain,
-		Opponent0ShoesSub0:      battle.Opponent0ShoesSub0,
-		Opponent0ShoesSub1:      battle.Opponent0ShoesSub1,
-		Opponent0ShoesSub2:      battle.Opponent0ShoesSub2,
-		Opponent1SplatnetId:     battle.Opponent1SplatnetId,
-		Opponent1Name:           battle.Opponent1Name,
-		Opponent1Rank:           battle.Opponent1Rank,
-		Opponent1LevelStar:      battle.Opponent1LevelStar,
-		Opponent1Level:          battle.Opponent1Level,
-		Opponent1Weapon:         battle.Opponent1Weapon,
-		Opponent1Gender:         battle.Opponent1Gender,
-		Opponent1Species:        battle.Opponent1Species,
-		Opponent1Assists:        battle.Opponent1Assists,
-		Opponent1Deaths:         battle.Opponent1Deaths,
-		Opponent1GamePaintPoint: battle.Opponent1GamePaintPoint,
-		Opponent1Kills:          battle.Opponent1Kills,
-		Opponent1Specials:       battle.Opponent1Specials,
-		Opponent1Headgear:       battle.Opponent1Headgear,
-		Opponent1HeadgearMain:   battle.Opponent1HeadgearMain,
-		Opponent1HeadgearSub0:   battle.Opponent1HeadgearSub0,
-		Opponent1HeadgearSub1:   battle.Opponent1HeadgearSub1,
-		Opponent1HeadgearSub2:   battle.Opponent1HeadgearSub2,
-		Opponent1Clothes:        battle.Opponent1Clothes,
-		Opponent1ClothesMain:    battle.Opponent1ClothesMain,
-		Opponent1ClothesSub0:    battle.Opponent1ClothesSub0,
-		Opponent1ClothesSub1:    battle.Opponent1ClothesSub1,
-		Opponent1ClothesSub2:    battle.Opponent1ClothesSub2,
-		Opponent1Shoes:          battle.Opponent1Shoes,
-		Opponent1ShoesMain:      battle.Opponent1ShoesMain,
-		Opponent1ShoesSub0:      battle.Opponent1ShoesSub0,
-		Opponent1ShoesSub1:      battle.Opponent1ShoesSub1,
-		Opponent1ShoesSub2:      battle.Opponent1ShoesSub2,
-		Opponent2SplatnetId:     battle.Opponent2SplatnetId,
-		Opponent2Name:           battle.Opponent2Name,
-		Opponent2Rank:           battle.Opponent2Rank,
-		Opponent2LevelStar:      battle.Opponent2LevelStar,
-		Opponent2Level:          battle.Opponent2Level,
-		Opponent2Weapon:         battle.Opponent2Weapon,
-		Opponent2Gender:         battle.Opponent2Gender,
-		Opponent2Species:        battle.Opponent2Species,
-		Opponent2Assists:        battle.Opponent2Assists,
-		Opponent2Deaths:         battle.Opponent2Deaths,
-		Opponent2GamePaintPoint: battle.Opponent2GamePaintPoint,
-		Opponent2Kills:          battle.Opponent2Kills,
-		Opponent2Specials:       battle.Opponent2Specials,
-		Opponent2Headgear:       battle.Opponent2Headgear,
-		Opponent2HeadgearMain:   battle.Opponent2HeadgearMain,
-		Opponent2HeadgearSub0:   battle.Opponent2HeadgearSub0,
-		Opponent2HeadgearSub1:   battle.Opponent2HeadgearSub1,
-		Opponent2HeadgearSub2:   battle.Opponent2HeadgearSub2,
-		Opponent2Clothes:        battle.Opponent2Clothes,
-		Opponent2ClothesMain:    battle.Opponent2ClothesMain,
-		Opponent2ClothesSub0:    battle.Opponent2ClothesSub0,
-		Opponent2ClothesSub1:    battle.Opponent2ClothesSub1,
-		Opponent2ClothesSub2:    battle.Opponent2ClothesSub2,
-		Opponent2Shoes:          battle.Opponent2Shoes,
-		Opponent2ShoesMain:      battle.Opponent2ShoesMain,
-		Opponent2ShoesSub0:      battle.Opponent2ShoesSub0,
-		Opponent2ShoesSub1:      battle.Opponent2ShoesSub1,
-		Opponent2ShoesSub2:      battle.Opponent2ShoesSub2,
-		Opponent3SplatnetId:     battle.Opponent3SplatnetId,
-		Opponent3Name:           battle.Opponent3Name,
-		Opponent3Rank:           battle.Opponent3Rank,
-		Opponent3LevelStar:      battle.Opponent3LevelStar,
-		Opponent3Level:          battle.Opponent3Level,
-		Opponent3Weapon:         battle.Opponent3Weapon,
-		Opponent3Gender:         battle.Opponent3Gender,
-		Opponent3Species:        battle.Opponent3Species,
-		Opponent3Assists:        battle.Opponent3Assists,
-		Opponent3Deaths:         battle.Opponent3Deaths,
-		Opponent3GamePaintPoint: battle.Opponent3GamePaintPoint,
-		Opponent3Kills:          battle.Opponent3Kills,
-		Opponent3Specials:       battle.Opponent3Specials,
-		Opponent3Headgear:       battle.Opponent3Headgear,
-		Opponent3HeadgearMain:   battle.Opponent3HeadgearMain,
-		Opponent3HeadgearSub0:   battle.Opponent3HeadgearSub0,
-		Opponent3HeadgearSub1:   battle.Opponent3HeadgearSub1,
-		Opponent3HeadgearSub2:   battle.Opponent3HeadgearSub2,
-		Opponent3Clothes:        battle.Opponent3Clothes,
-		Opponent3ClothesMain:    battle.Opponent3ClothesMain,
-		Opponent3ClothesSub0:    battle.Opponent3ClothesSub0,
-		Opponent3ClothesSub1:    battle.Opponent3ClothesSub1,
-		Opponent3ClothesSub2:    battle.Opponent3ClothesSub2,
-		Opponent3Shoes:          battle.Opponent3Shoes,
-		Opponent3ShoesMain:      battle.Opponent3ShoesMain,
-		Opponent3ShoesSub0:      battle.Opponent3ShoesSub0,
-		Opponent3ShoesSub1:      battle.Opponent3ShoesSub1,
-		Opponent3ShoesSub2:      battle.Opponent3ShoesSub2,
-		Teammate0SplatnetId:     battle.Teammate0SplatnetId,
-		Teammate0Name:           battle.Teammate0Name,
-		Teammate0Rank:           battle.Teammate0Rank,
-		Teammate0LevelStar:      battle.Teammate0LevelStar,
-		Teammate0Level:          battle.Teammate0Level,
-		Teammate0Weapon:         battle.Teammate0Weapon,
-		Teammate0Gender:         battle.Teammate0Gender,
-		Teammate0Species:        battle.Teammate0Species,
-		Teammate0Assists:        battle.Teammate0Assists,
-		Teammate0Deaths:         battle.Teammate0Deaths,
-		Teammate0GamePaintPoint: battle.Teammate0GamePaintPoint,
-		Teammate0Kills:          battle.Teammate0Kills,
-		Teammate0Specials:       battle.Teammate0Specials,
-		Teammate0Headgear:       battle.Teammate0Headgear,
-		Teammate0HeadgearMain:   battle.Teammate0HeadgearMain,
-		Teammate0HeadgearSub0:   battle.Teammate0HeadgearSub0,
-		Teammate0HeadgearSub1:   battle.Teammate0HeadgearSub1,
-		Teammate0HeadgearSub2:   battle.Teammate0HeadgearSub2,
-		Teammate0Clothes:        battle.Teammate0Clothes,
-		Teammate0ClothesMain:    battle.Teammate0ClothesMain,
-		Teammate0ClothesSub0:    battle.Teammate0ClothesSub0,
-		Teammate0ClothesSub1:    battle.Teammate0ClothesSub1,
-		Teammate0ClothesSub2:    battle.Teammate0ClothesSub2,
-		Teammate0Shoes:          battle.Teammate0Shoes,
-		Teammate0ShoesMain:      battle.Teammate0ShoesMain,
-		Teammate0ShoesSub0:      battle.Teammate0ShoesSub0,
-		Teammate0ShoesSub1:      battle.Teammate0ShoesSub1,
-		Teammate0ShoesSub2:      battle.Teammate0ShoesSub2,
-		Teammate1SplatnetId:     battle.Teammate1SplatnetId,
-		Teammate1Name:           battle.Teammate1Name,
-		Teammate1Rank:           battle.Teammate1Rank,
-		Teammate1LevelStar:      battle.Teammate1LevelStar,
-		Teammate1Level:          battle.Teammate1Level,
-		Teammate1Weapon:         battle.Teammate1Weapon,
-		Teammate1Gender:         battle.Teammate1Gender,
-		Teammate1Species:        battle.Teammate1Species,
-		Teammate1Assists:        battle.Teammate1Assists,
-		Teammate1Deaths:         battle.Teammate1Deaths,
-		Teammate1GamePaintPoint: battle.Teammate1GamePaintPoint,
-		Teammate1Kills:          battle.Teammate1Kills,
-		Teammate1Specials:       battle.Teammate1Specials,
-		Teammate1Headgear:       battle.Teammate1Headgear,
-		Teammate1HeadgearMain:   battle.Teammate1HeadgearMain,
-		Teammate1HeadgearSub0:   battle.Teammate1HeadgearSub0,
-		Teammate1HeadgearSub1:   battle.Teammate1HeadgearSub1,
-		Teammate1HeadgearSub2:   battle.Teammate1HeadgearSub2,
-		Teammate1Clothes:        battle.Teammate1Clothes,
-		Teammate1ClothesMain:    battle.Teammate1ClothesMain,
-		Teammate1ClothesSub0:    battle.Teammate1ClothesSub0,
-		Teammate1ClothesSub1:    battle.Teammate1ClothesSub1,
-		Teammate1ClothesSub2:    battle.Teammate1ClothesSub2,
-		Teammate1Shoes:          battle.Teammate1Shoes,
-		Teammate1ShoesMain:      battle.Teammate1ShoesMain,
-		Teammate1ShoesSub0:      battle.Teammate1ShoesSub0,
-		Teammate1ShoesSub1:      battle.Teammate1ShoesSub1,
-		Teammate1ShoesSub2:      battle.Teammate1ShoesSub2,
-		Teammate2SplatnetId:     battle.Teammate2SplatnetId,
-		Teammate2Name:           battle.Teammate2Name,
-		Teammate2Rank:           battle.Teammate2Rank,
-		Teammate2LevelStar:      battle.Teammate2LevelStar,
-		Teammate2Level:          battle.Teammate2Level,
-		Teammate2Weapon:         battle.Teammate2Weapon,
-		Teammate2Gender:         battle.Teammate2Gender,
-		Teammate2Species:        battle.Teammate2Species,
-		Teammate2Assists:        battle.Teammate2Assists,
-		Teammate2Deaths:         battle.Teammate2Deaths,
-		Teammate2GamePaintPoint: battle.Teammate2GamePaintPoint,
-		Teammate2Kills:          battle.Teammate2Kills,
-		Teammate2Specials:       battle.Teammate2Specials,
-		Teammate2Headgear:       battle.Teammate2Headgear,
-		Teammate2HeadgearMain:   battle.Teammate2HeadgearMain,
-		Teammate2HeadgearSub0:   battle.Teammate2HeadgearSub0,
-		Teammate2HeadgearSub1:   battle.Teammate2HeadgearSub1,
-		Teammate2HeadgearSub2:   battle.Teammate2HeadgearSub2,
-		Teammate2Clothes:        battle.Teammate2Clothes,
-		Teammate2ClothesMain:    battle.Teammate2ClothesMain,
-		Teammate2ClothesSub0:    battle.Teammate2ClothesSub0,
-		Teammate2ClothesSub1:    battle.Teammate2ClothesSub1,
-		Teammate2ClothesSub2:    battle.Teammate2ClothesSub2,
-		Teammate2Shoes:          battle.Teammate2Shoes,
-		Teammate2ShoesMain:      battle.Teammate2ShoesMain,
-		Teammate2ShoesSub0:      battle.Teammate2ShoesSub0,
-		Teammate2ShoesSub1:      battle.Teammate2ShoesSub1,
-		Teammate2ShoesSub2:      battle.Teammate2ShoesSub2,
-		PlayerName:              battle.PlayerName,
-		PlayerRank:              battle.PlayerRank,
-		PlayerLevelStar:         battle.PlayerLevelStar,
-		PlayerLevel:             battle.PlayerLevel,
-		PlayerWeapon:            battle.PlayerWeapon,
-		PlayerGender:            battle.PlayerGender,
-		PlayerSpecies:           battle.PlayerSpecies,
-		PlayerAssists:           battle.PlayerAssists,
-		PlayerDeaths:            battle.PlayerDeaths,
-		PlayerGamePaintPoint:    battle.PlayerGamePaintPoint,
-		PlayerKills:             battle.PlayerKills,
-		PlayerSpecials:          battle.PlayerSpecials,
-		PlayerHeadgear:          battle.PlayerHeadgear,
-		PlayerHeadgearMain:      battle.PlayerHeadgearMain,
-		PlayerHeadgearSub0:      battle.PlayerHeadgearSub0,
-		PlayerHeadgearSub1:      battle.PlayerHeadgearSub1,
-		PlayerHeadgearSub2:      battle.PlayerHeadgearSub2,
-		PlayerClothes:           battle.PlayerClothes,
-		PlayerClothesMain:       battle.PlayerClothesMain,
-		PlayerClothesSub0:       battle.PlayerClothesSub0,
-		PlayerClothesSub1:       battle.PlayerClothesSub1,
-		PlayerClothesSub2:       battle.PlayerClothesSub2,
-		PlayerShoes:             battle.PlayerShoes,
-		PlayerShoesMain:         battle.PlayerShoesMain,
-		PlayerShoesSub0:         battle.PlayerShoesSub0,
-		PlayerShoesSub1:         battle.PlayerShoesSub1,
-		PlayerShoesSub2:         battle.PlayerShoesSub2,
-	}, nil
-}
-
-func GetBattleLean(userId int64, splatnetNumber int64) (*api_objects.Battle, error) {
+func GetBattleLean(userId int64, splatnetNumber int64) (*api_objects.Battle2, error) {
 	var battle db_objects.Battle
 	var pk int
 	if err := readObjWithUserSplatnet(userId, splatnetNumber, "two_battles_battle").Scan(
@@ -569,7 +236,7 @@ func GetBattleLean(userId int64, splatnetNumber int64) (*api_objects.Battle, err
 	}
 	hasDC := battle.HasDisconnectedPlayer != 0
 	win := battle.Win != 0
-	return &api_objects.Battle{
+	return &api_objects.Battle2{
 		UserId:                  battle.UserId,
 		SplatnetJson:            nil,
 		StatInkJson:             nil,
@@ -815,7 +482,7 @@ func GetBattleLean(userId int64, splatnetNumber int64) (*api_objects.Battle, err
 	}, nil
 }
 
-func GetBattlePk(pk int64) (*api_objects.Battle, error) {
+func GetBattlePk(pk int64) (*api_objects.Battle2, error) {
 	var battle db_objects.Battle
 	if err := readObjWithId(pk, "two_battles_battle").Scan(
 		&pk, &battle.UserId, &battle.SplatnetJson, &battle.SplatnetUpload, &battle.StatInkJson, &battle.StatInkUpload,
@@ -904,7 +571,7 @@ func GetBattlePk(pk int64) (*api_objects.Battle, error) {
 	}
 	hasDC := battle.HasDisconnectedPlayer != 0
 	win := battle.Win != 0
-	return &api_objects.Battle{
+	return &api_objects.Battle2{
 		UserId:                  battle.UserId,
 		SplatnetJson:            battleSplatnet,
 		StatInkJson:             battleStatInk,
@@ -1150,7 +817,7 @@ func GetBattlePk(pk int64) (*api_objects.Battle, error) {
 	}, nil
 }
 
-func GetBattleLeanPk(pk int64) (*api_objects.Battle, error) {
+func GetBattleLeanPk(pk int64) (*api_objects.Battle2, error) {
 	var battle db_objects.Battle
 	if err := readObjWithId(pk, "two_battles_battle").Scan(
 		&pk, &battle.UserId, &battle.SplatnetJson, &battle.SplatnetUpload, &battle.StatInkJson, &battle.StatInkUpload,
@@ -1223,7 +890,7 @@ func GetBattleLeanPk(pk int64) (*api_objects.Battle, error) {
 	}
 	hasDC := battle.HasDisconnectedPlayer != 0
 	win := battle.Win != 0
-	return &api_objects.Battle{
+	return &api_objects.Battle2{
 		UserId:                  battle.UserId,
 		BattleNumber:            battle.SplatnetNumber,
 		PlayerSplatnetId:        battle.PlayerSplatnetId,
@@ -2726,7 +2393,7 @@ func readBattleStatInkAgentVariables(pk int64) (*api_objects.BattleStatInkAgentV
 	return &variables, nil
 }
 
-func GetShift(userId, splatnetNumber int64) (*api_objects.Shift, error) {
+func GetShift(userId, splatnetNumber int64) (*api_objects.Shift2, error) {
 	shift := db_objects.Shift{}
 	var junk int64
 	if err := readObjWithUserSplatnet(userId, splatnetNumber, "two_salmon_shift").Scan(
@@ -2791,7 +2458,7 @@ func GetShift(userId, splatnetNumber int64) (*api_objects.Shift, error) {
 			return nil, err
 		}
 	}
-	return &api_objects.Shift{
+	return &api_objects.Shift2{
 		UserId:                  shift.UserId,
 		PlayerSplatnetId:        shift.PlayerSplatnetId,
 		JobId:                   shift.JobId,
@@ -2940,7 +2607,7 @@ func GetShift(userId, splatnetNumber int64) (*api_objects.Shift, error) {
 	}, nil
 }
 
-func GetShiftLean(userId, splatnetNumber int64) (*api_objects.Shift, error) {
+func GetShiftLean(userId, splatnetNumber int64) (*api_objects.Shift2, error) {
 	shift := db_objects.Shift{}
 	var junk int64
 	if err := readObjWithUserSplatnet(userId, splatnetNumber, "two_salmon_shift").Scan(
@@ -2989,7 +2656,7 @@ func GetShiftLean(userId, splatnetNumber int64) (*api_objects.Shift, error) {
 	); err != nil {
 		return nil, err
 	}
-	return &api_objects.Shift{
+	return &api_objects.Shift2{
 		UserId:                  shift.UserId,
 		PlayerSplatnetId:        shift.PlayerSplatnetId,
 		JobId:                   shift.JobId,
@@ -3138,7 +2805,7 @@ func GetShiftLean(userId, splatnetNumber int64) (*api_objects.Shift, error) {
 	}, nil
 }
 
-func GetShiftPk(pk int64) (*api_objects.Shift, error) {
+func GetShiftLeanPk(pk int64) (*api_objects.Shift2, error) {
 	shift := db_objects.Shift{}
 	if err := readObjWithId(pk, "two_salmon_shift").Scan(
 		&pk,
@@ -3186,220 +2853,7 @@ func GetShiftPk(pk int64) (*api_objects.Shift, error) {
 	); err != nil {
 		return nil, err
 	}
-	var splatnet *api_objects.ShiftSplatnet
-	if shift.SplatnetJson != nil {
-		var err error
-		splatnet, err = getShiftSplatnet(*shift.SplatnetJson)
-		if err != nil {
-			return nil, err
-		}
-	}
-	var statink *api_objects.ShiftStatInk
-	if shift.StatInkJson != nil {
-		var err error
-		statink, err = getShiftStatInk(*shift.StatInkJson)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return &api_objects.Shift{
-		UserId:                  shift.UserId,
-		PlayerSplatnetId:        shift.PlayerSplatnetId,
-		JobId:                   shift.JobId,
-		SplatnetJson:            splatnet,
-		StatInkJson:             statink,
-		StartTime:               shift.StartTime,
-		PlayTime:                shift.PlayTime,
-		EndTime:                 shift.EndTime,
-		DangerRate:              shift.DangerRate,
-		IsClear:                 shift.IsClear,
-		JobFailureReason:        shift.JobFailureReason,
-		FailureWave:             shift.FailureWave,
-		GradePoint:              shift.GradePoint,
-		GradePointDelta:         shift.GradePointDelta,
-		JobScore:                shift.JobScore,
-		DrizzlerCount:           shift.DrizzlerCount,
-		FlyfishCount:            shift.FlyfishCount,
-		GoldieCount:             shift.GoldieCount,
-		GrillerCount:            shift.GrillerCount,
-		MawsCount:               shift.MawsCount,
-		ScrapperCount:           shift.ScrapperCount,
-		SteelEelCount:           shift.SteelEelCount,
-		SteelheadCount:          shift.SteelheadCount,
-		StingerCount:            shift.StingerCount,
-		Stage:                   shift.Stage,
-		PlayerName:              shift.PlayerName,
-		PlayerDeathCount:        shift.PlayerDeathCount,
-		PlayerReviveCount:       shift.PlayerReviveCount,
-		PlayerGoldenEggs:        shift.PlayerGoldenEggs,
-		PlayerPowerEggs:         shift.PlayerPowerEggs,
-		PlayerSpecial:           shift.PlayerSpecial,
-		PlayerTitle:             shift.PlayerTitle,
-		PlayerSpecies:           shift.PlayerSpecies,
-		PlayerGender:            shift.PlayerGender,
-		PlayerW1Specials:        shift.PlayerW1Specials,
-		PlayerW2Specials:        shift.PlayerW2Specials,
-		PlayerW3Specials:        shift.PlayerW3Specials,
-		PlayerW1Weapon:          shift.PlayerW1Weapon,
-		PlayerW2Weapon:          shift.PlayerW2Weapon,
-		PlayerW3Weapon:          shift.PlayerW3Weapon,
-		PlayerDrizzlerKills:     shift.PlayerDrizzlerKills,
-		PlayerFlyfishKills:      shift.PlayerFlyfishKills,
-		PlayerGoldieKills:       shift.PlayerGoldieKills,
-		PlayerGrillerKills:      shift.PlayerGrillerKills,
-		PlayerMawsKills:         shift.PlayerMawsKills,
-		PlayerScrapperKills:     shift.PlayerScrapperKills,
-		PlayerSteelEelKills:     shift.PlayerSteelEelKills,
-		PlayerSteelheadKills:    shift.PlayerSteelheadKills,
-		PlayerStingerKills:      shift.PlayerStingerKills,
-		Teammate0SplatnetId:     shift.Teammate0SplatnetId,
-		Teammate0Name:           shift.Teammate0Name,
-		Teammate0DeathCount:     shift.Teammate0DeathCount,
-		Teammate0ReviveCount:    shift.Teammate0ReviveCount,
-		Teammate0GoldenEggs:     shift.Teammate0GoldenEggs,
-		Teammate0PowerEggs:      shift.Teammate0PowerEggs,
-		Teammate0Special:        shift.Teammate0Special,
-		Teammate0Species:        shift.Teammate0Species,
-		Teammate0Gender:         shift.Teammate0Gender,
-		Teammate0W1Specials:     shift.Teammate0W1Specials,
-		Teammate0W2Specials:     shift.Teammate0W2Specials,
-		Teammate0W3Specials:     shift.Teammate0W3Specials,
-		Teammate0W1Weapon:       shift.Teammate0W1Weapon,
-		Teammate0W2Weapon:       shift.Teammate0W2Weapon,
-		Teammate0W3Weapon:       shift.Teammate0W3Weapon,
-		Teammate0DrizzlerKills:  shift.Teammate0DrizzlerKills,
-		Teammate0FlyfishKills:   shift.Teammate0FlyfishKills,
-		Teammate0GoldieKills:    shift.Teammate0GoldieKills,
-		Teammate0GrillerKills:   shift.Teammate0GrillerKills,
-		Teammate0MawsKills:      shift.Teammate0MawsKills,
-		Teammate0ScrapperKills:  shift.Teammate0ScrapperKills,
-		Teammate0SteelEelKills:  shift.Teammate0SteelEelKills,
-		Teammate0SteelheadKills: shift.Teammate0SteelheadKills,
-		Teammate0StingerKills:   shift.Teammate0StingerKills,
-		Teammate1SplatnetId:     shift.Teammate1SplatnetId,
-		Teammate1Name:           shift.Teammate1Name,
-		Teammate1DeathCount:     shift.Teammate1DeathCount,
-		Teammate1ReviveCount:    shift.Teammate1ReviveCount,
-		Teammate1GoldenEggs:     shift.Teammate1GoldenEggs,
-		Teammate1PowerEggs:      shift.Teammate1PowerEggs,
-		Teammate1Special:        shift.Teammate1Special,
-		Teammate1Species:        shift.Teammate1Species,
-		Teammate1Gender:         shift.Teammate1Gender,
-		Teammate1W1Specials:     shift.Teammate1W1Specials,
-		Teammate1W2Specials:     shift.Teammate1W2Specials,
-		Teammate1W3Specials:     shift.Teammate1W3Specials,
-		Teammate1W1Weapon:       shift.Teammate1W1Weapon,
-		Teammate1W2Weapon:       shift.Teammate1W2Weapon,
-		Teammate1W3Weapon:       shift.Teammate1W3Weapon,
-		Teammate1DrizzlerKills:  shift.Teammate1DrizzlerKills,
-		Teammate1FlyfishKills:   shift.Teammate1FlyfishKills,
-		Teammate1GoldieKills:    shift.Teammate1GoldieKills,
-		Teammate1GrillerKills:   shift.Teammate1GrillerKills,
-		Teammate1MawsKills:      shift.Teammate1MawsKills,
-		Teammate1ScrapperKills:  shift.Teammate1ScrapperKills,
-		Teammate1SteelEelKills:  shift.Teammate1SteelEelKills,
-		Teammate1SteelheadKills: shift.Teammate1SteelheadKills,
-		Teammate1StingerKills:   shift.Teammate1StingerKills,
-		Teammate2SplatnetId:     shift.Teammate2SplatnetId,
-		Teammate2Name:           shift.Teammate2Name,
-		Teammate2DeathCount:     shift.Teammate2DeathCount,
-		Teammate2ReviveCount:    shift.Teammate2ReviveCount,
-		Teammate2GoldenEggs:     shift.Teammate2GoldenEggs,
-		Teammate2PowerEggs:      shift.Teammate2PowerEggs,
-		Teammate2Special:        shift.Teammate2Special,
-		Teammate2Species:        shift.Teammate2Species,
-		Teammate2Gender:         shift.Teammate2Gender,
-		Teammate2W1Specials:     shift.Teammate2W1Specials,
-		Teammate2W2Specials:     shift.Teammate2W2Specials,
-		Teammate2W3Specials:     shift.Teammate2W3Specials,
-		Teammate2W1Weapon:       shift.Teammate2W1Weapon,
-		Teammate2W2Weapon:       shift.Teammate2W2Weapon,
-		Teammate2W3Weapon:       shift.Teammate2W3Weapon,
-		Teammate2DrizzlerKills:  shift.Teammate2DrizzlerKills,
-		Teammate2FlyfishKills:   shift.Teammate2FlyfishKills,
-		Teammate2GoldieKills:    shift.Teammate2GoldieKills,
-		Teammate2GrillerKills:   shift.Teammate2GrillerKills,
-		Teammate2MawsKills:      shift.Teammate2MawsKills,
-		Teammate2ScrapperKills:  shift.Teammate2ScrapperKills,
-		Teammate2SteelEelKills:  shift.Teammate2SteelEelKills,
-		Teammate2SteelheadKills: shift.Teammate2SteelheadKills,
-		Teammate2StingerKills:   shift.Teammate2StingerKills,
-		ScheduleEndTime:         shift.ScheduleEndTime,
-		ScheduleStartTime:       *shift.ScheduleStartTime,
-		ScheduleWeapon0:         shift.ScheduleWeapon0,
-		ScheduleWeapon1:         shift.ScheduleWeapon1,
-		ScheduleWeapon2:         shift.ScheduleWeapon2,
-		ScheduleWeapon3:         shift.ScheduleWeapon3,
-		Wave1WaterLevel:         shift.Wave1WaterLevel,
-		Wave1EventType:          shift.Wave1EventType,
-		Wave1GoldenDelivered:    shift.Wave1GoldenIkuraNum,
-		Wave1GoldenAppear:       shift.Wave1GoldenIkuraPopNum,
-		Wave1PowerEggs:          shift.Wave1IkuraNum,
-		Wave1Quota:              shift.Wave1QuotaNum,
-		Wave2WaterLevel:         shift.Wave2WaterLevel,
-		Wave2EventType:          shift.Wave2EventType,
-		Wave2GoldenDelivered:    shift.Wave2GoldenIkuraNum,
-		Wave2GoldenAppear:       shift.Wave2GoldenIkuraPopNum,
-		Wave2PowerEggs:          shift.Wave2IkuraNum,
-		Wave2Quota:              shift.Wave2QuotaNum,
-		Wave3WaterLevel:         shift.Wave3WaterLevel,
-		Wave3EventType:          shift.Wave3EventType,
-		Wave3GoldenDelivered:    shift.Wave3GoldenIkuraNum,
-		Wave3GoldenAppear:       shift.Wave3GoldenIkuraPopNum,
-		Wave3PowerEggs:          shift.Wave3IkuraNum,
-		Wave3Quota:              shift.Wave3QuotaNum,
-	}, nil
-}
-
-func GetShiftLeanPk(pk int64) (*api_objects.Shift, error) {
-	shift := db_objects.Shift{}
-	if err := readObjWithId(pk, "two_salmon_shift").Scan(
-		&pk,
-		&shift.UserId, &shift.PlayerSplatnetId, &shift.JobId,
-		&shift.SplatnetJson, &shift.StatInkJson, &shift.StartTime, &shift.PlayTime, &shift.EndTime, &shift.DangerRate,
-		&shift.IsClear, &shift.JobFailureReason, &shift.FailureWave, &shift.GradePoint, &shift.GradePointDelta,
-		&shift.JobScore,
-		&shift.DrizzlerCount, &shift.FlyfishCount, &shift.GoldieCount, &shift.GrillerCount,
-		&shift.MawsCount, &shift.ScrapperCount, &shift.SteelEelCount, &shift.SteelheadCount, &shift.StingerCount,
-		&shift.Stage,
-		&shift.PlayerName, &shift.PlayerDeathCount, &shift.PlayerReviveCount, &shift.PlayerGoldenEggs,
-		&shift.PlayerPowerEggs, &shift.PlayerSpecial, &shift.PlayerTitle, &shift.PlayerSpecies, &shift.PlayerGender,
-		&shift.PlayerW1Specials, &shift.PlayerW2Specials, &shift.PlayerW3Specials, &shift.PlayerW1Weapon,
-		&shift.PlayerW2Weapon, &shift.PlayerW3Weapon, &shift.PlayerDrizzlerKills, &shift.PlayerFlyfishKills,
-		&shift.PlayerGoldieKills, &shift.PlayerGrillerKills, &shift.PlayerMawsKills, &shift.PlayerScrapperKills,
-		&shift.PlayerSteelEelKills, &shift.PlayerSteelheadKills, &shift.PlayerStingerKills,
-		&shift.Teammate0SplatnetId, &shift.Teammate0Name, &shift.Teammate0DeathCount, &shift.Teammate0ReviveCount,
-		&shift.Teammate0GoldenEggs, &shift.Teammate0PowerEggs, &shift.Teammate0Special, &shift.Teammate0Species,
-		&shift.Teammate0Gender, &shift.Teammate0W1Specials, &shift.Teammate0W2Specials, &shift.Teammate0W3Specials,
-		&shift.Teammate0W1Weapon, &shift.Teammate0W2Weapon, &shift.Teammate0W3Weapon, &shift.Teammate0DrizzlerKills,
-		&shift.Teammate0FlyfishKills, &shift.Teammate0GoldieKills, &shift.Teammate0GrillerKills,
-		&shift.Teammate0MawsKills, &shift.Teammate0ScrapperKills, &shift.Teammate0SteelEelKills,
-		&shift.Teammate0SteelheadKills, &shift.Teammate0StingerKills,
-		&shift.Teammate1SplatnetId, &shift.Teammate1Name, &shift.Teammate1DeathCount, &shift.Teammate1ReviveCount,
-		&shift.Teammate1GoldenEggs, &shift.Teammate1PowerEggs, &shift.Teammate1Special, &shift.Teammate1Species,
-		&shift.Teammate1Gender, &shift.Teammate1W1Specials, &shift.Teammate1W2Specials, &shift.Teammate1W3Specials,
-		&shift.Teammate1W1Weapon, &shift.Teammate1W2Weapon, &shift.Teammate1W3Weapon, &shift.Teammate1DrizzlerKills,
-		&shift.Teammate1FlyfishKills, &shift.Teammate1GoldieKills, &shift.Teammate1GrillerKills,
-		&shift.Teammate1MawsKills, &shift.Teammate1ScrapperKills, &shift.Teammate1SteelEelKills,
-		&shift.Teammate1SteelheadKills, &shift.Teammate1StingerKills,
-		&shift.Teammate2SplatnetId, &shift.Teammate2Name, &shift.Teammate2DeathCount, &shift.Teammate2ReviveCount,
-		&shift.Teammate2GoldenEggs, &shift.Teammate2PowerEggs, &shift.Teammate2Special, &shift.Teammate2Species,
-		&shift.Teammate2Gender, &shift.Teammate2W1Specials, &shift.Teammate2W2Specials, &shift.Teammate2W3Specials,
-		&shift.Teammate2W1Weapon, &shift.Teammate2W2Weapon, &shift.Teammate2W3Weapon, &shift.Teammate2DrizzlerKills,
-		&shift.Teammate2FlyfishKills, &shift.Teammate2GoldieKills, &shift.Teammate2GrillerKills,
-		&shift.Teammate2MawsKills, &shift.Teammate2ScrapperKills, &shift.Teammate2SteelEelKills,
-		&shift.Teammate2SteelheadKills, &shift.Teammate2StingerKills,
-		&shift.ScheduleEndTime, &shift.ScheduleStartTime, &shift.ScheduleWeapon0, &shift.ScheduleWeapon1,
-		&shift.ScheduleWeapon2, &shift.ScheduleWeapon3,
-		&shift.Wave1WaterLevel, &shift.Wave1EventType, &shift.Wave1GoldenIkuraNum, &shift.Wave1GoldenIkuraPopNum,
-		&shift.Wave1IkuraNum, &shift.Wave1QuotaNum, &shift.Wave2WaterLevel, &shift.Wave2EventType,
-		&shift.Wave2GoldenIkuraNum, &shift.Wave2GoldenIkuraPopNum, &shift.Wave2IkuraNum, &shift.Wave2QuotaNum,
-		&shift.Wave3WaterLevel, &shift.Wave3EventType, &shift.Wave3GoldenIkuraNum, &shift.Wave3GoldenIkuraPopNum,
-		&shift.Wave3IkuraNum, &shift.Wave3QuotaNum,
-	); err != nil {
-		return nil, err
-	}
-	return &api_objects.Shift{
+	return &api_objects.Shift2{
 		UserId:                  shift.UserId,
 		PlayerSplatnetId:        shift.PlayerSplatnetId,
 		JobId:                   shift.JobId,
@@ -3546,6 +3000,284 @@ func GetShiftLeanPk(pk int64) (*api_objects.Shift, error) {
 		Wave3PowerEggs:          shift.Wave3IkuraNum,
 		Wave3Quota:              shift.Wave3QuotaNum,
 	}, nil
+}
+
+func GetShifts3(userId, stage string, resultWave int, timeFrom, timeTo time.Time) ([]string, error) {
+	var rows *sql.Rows
+	var err error
+	if userId != "" {
+		if stage != "" {
+			if resultWave != -1 {
+				rows, err = db.Query("select userId, id, playerId, playedtime\nfrom three_salmon_shift\nwhere userId = $1\n  and stage = $2\n  and resultwave = $3\n  and playedtime >= $4\n  and playedTime <= $5;", userId, stage, resultWave, timeFrom, timeTo)
+			} else {
+				rows, err = db.Query("select userId, id, playerId, playedtime\nfrom three_salmon_shift\nwhere userID = $1\n  and stage = $2\n  and playedtime >= $3\n  and playedTime <= $4;", userId, stage, timeFrom, timeTo)
+			}
+		} else {
+			if resultWave != -1 {
+				rows, err = db.Query("select userId, id, playerId, playedtime\nfrom three_salmon_shift\nwhere userId = $1 \n  and resultwave = $2\n  and playedtime >= $3\n  and playedTime <= $4;\n", userId, resultWave, timeFrom, timeTo)
+			} else {
+				rows, err = db.Query("select userId, id, playerId, playedtime\nfrom three_salmon_shift\nwhere userId = $1 \n  and playedtime >= $2\n  and playedTime <= $3;", userId, timeFrom, timeTo)
+			}
+		}
+	} else {
+		if stage != "" {
+			if resultWave != -1 {
+				rows, err = db.Query("select userId, id, playerId, playedtime\nfrom three_salmon_shift\nwhere stage = $1\n  and resultwave = $2\n  and playedtime >= $3\n  and playedTime <= $4;", stage, resultWave, timeFrom, timeTo)
+			} else {
+				rows, err = db.Query("select userId, id, playerId, playedtime\nfrom three_salmon_shift\nwhere stage = $1\n  and playedtime >= $2\n  and playedTime <= $3;", stage, timeFrom, timeTo)
+			}
+		} else {
+			if resultWave != -1 {
+				rows, err = db.Query("select userId, id, playerId, playedtime\nfrom three_salmon_shift\nwhere resultwave = $1\n  and playedtime >= $2\n  and playedTime <= $3;\n", resultWave, timeFrom, timeTo)
+			} else {
+				rows, err = db.Query("select userId, id, playerId, playedtime\nfrom three_salmon_shift\nwhere playedtime >= $1\n  and playedTime <= $2;", timeFrom, timeTo)
+			}
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var shifts []string
+	for rows.Next() {
+		var userId int64
+		var shift api_objects.Shift3
+		if err := rows.Scan(&userId, &shift.Data.CoopHistoryDetail.ID, &shift.Data.CoopHistoryDetail.MyResult.Player.ID, &shift.Data.CoopHistoryDetail.PlayedTime); err != nil {
+			return nil, err
+		}
+		shift.EncodeId()
+		shifts = append(shifts, fmt.Sprintf("%d/%s", userId, shift.Data.CoopHistoryDetail.ID))
+	}
+	return shifts, nil
+}
+
+func GetShift3(userId int64, shiftId string) (*api_objects.Shift3, error) {
+	var shift api_objects.Shift3
+	shift.Data.CoopHistoryDetail.ID = shiftId
+	if err := shift.DecodeId(); err != nil {
+		return nil, err
+	}
+	shiftId = shift.Data.CoopHistoryDetail.ID
+	var scaleBronze, scaleSilver, scaleGold *int
+	var hasDefeatBoss *bool
+	var boss *string
+	if err := db.QueryRow("select typename,\n       aftergrade,\n       playerbyname,\n       playerbackground,\n       playername,\n       playernameid,\n       playeruniform,\n       playerid,\n       playerspecies,\n       playerspecialweapon,\n       playerdefeatenemycount,\n       playerdelivercount,\n       playergoldenassistcount,\n       playergoldendelivercount,\n       playerrescuecount,\n       playerrescuedcount,\n       resultwave,\n       playedtime,\n       rule,\n       stage,\n       dangerrate,\n       scenariocode,\n       smellmeter,\n       aftergradepoint,\n       scalebronze,\n       scalesilver,\n       scalegold,\n       jobpoint,\n       jobscore,\n       jobrate,\n       jobbonus,\n       hasdefeatboss,\n       boss\nfrom three_salmon_shift\nwhere userid = $1\n  and id = $2;",
+		userId, shift.Data.CoopHistoryDetail.ID).Scan(&shift.Data.CoopHistoryDetail.Typename, &shift.Data.CoopHistoryDetail.AfterGrade.ID,
+		&shift.Data.CoopHistoryDetail.MyResult.Player.Byname,
+		&shift.Data.CoopHistoryDetail.MyResult.Player.Nameplate.Background.ID,
+		&shift.Data.CoopHistoryDetail.MyResult.Player.Name, &shift.Data.CoopHistoryDetail.MyResult.Player.NameID,
+		&shift.Data.CoopHistoryDetail.MyResult.Player.Uniform.ID, &shift.Data.CoopHistoryDetail.MyResult.Player.ID,
+		&shift.Data.CoopHistoryDetail.MyResult.Player.Species,
+		&shift.Data.CoopHistoryDetail.MyResult.SpecialWeapon.WeaponID,
+		&shift.Data.CoopHistoryDetail.MyResult.DefeatEnemyCount, &shift.Data.CoopHistoryDetail.MyResult.DeliverCount,
+		&shift.Data.CoopHistoryDetail.MyResult.GoldenAssistCount,
+		&shift.Data.CoopHistoryDetail.MyResult.GoldenDeliverCount, &shift.Data.CoopHistoryDetail.MyResult.RescueCount,
+		&shift.Data.CoopHistoryDetail.MyResult.RescuedCount, &shift.Data.CoopHistoryDetail.ResultWave,
+		&shift.Data.CoopHistoryDetail.PlayedTime, &shift.Data.CoopHistoryDetail.Rule,
+		&shift.Data.CoopHistoryDetail.CoopStage.ID, &shift.Data.CoopHistoryDetail.DangerRate,
+		&shift.Data.CoopHistoryDetail.ScenarioCode, &shift.Data.CoopHistoryDetail.SmellMeter,
+		&shift.Data.CoopHistoryDetail.AfterGradePoint, &scaleBronze, &scaleSilver, &scaleGold,
+		&shift.Data.CoopHistoryDetail.JobPoint, &shift.Data.CoopHistoryDetail.JobScore,
+		&shift.Data.CoopHistoryDetail.JobRate, &shift.Data.CoopHistoryDetail.JobBonus, &hasDefeatBoss, &boss,
+	); err != nil {
+		return nil, err
+	}
+	shift.Data.CoopHistoryDetail.AfterGrade.FillFromId()
+	shift.Data.CoopHistoryDetail.MyResult.SpecialWeapon.FillFromId()
+	shift.Data.CoopHistoryDetail.MyResult.Player.Nameplate.Background.FillFromId()
+	shift.Data.CoopHistoryDetail.MyResult.Player.Uniform.FillFromId()
+	shift.EncodeId()
+	shift.Data.CoopHistoryDetail.CoopStage.FillFromId()
+	shift.Data.CoopHistoryDetail.MyResult.Player.IsPlayer = "CoopPlayer"
+	if hasDefeatBoss != nil {
+		shift.Data.CoopHistoryDetail.BossResult = &api_objects.BossResult{
+			HasDefeatBoss: *hasDefeatBoss,
+			Boss: struct {
+				Name  string            `json:"name"`
+				ID    string            `json:"id"`
+				Image api_objects.Image `json:"image"`
+			}{ID: *boss},
+		}
+		shift.Data.CoopHistoryDetail.BossResult.Boss.FillFromId()
+		shift.Data.CoopHistoryDetail.Scale = &api_objects.Scale{
+			Gold:   *scaleGold,
+			Silver: *scaleSilver,
+			Bronze: *scaleBronze,
+		}
+	}
+	shift.Data.CoopHistoryDetail.MyResult.Player.Nameplate.Badges = []api_objects.Badge{}
+	if err := func() error {
+		rows, err := db.Query("select badge from three_salmon_user_badge where userId=$1 and shiftid=$2 order by badgeSlot;",
+			userId, shiftId)
+		if err != nil {
+			return err
+		}
+		defer rows.Close()
+		for rows.Next() {
+			var badge api_objects.Badge
+			if err := rows.Scan(&badge.ID); err != nil {
+				return err
+			}
+			badge.EncodeId()
+			shift.Data.CoopHistoryDetail.MyResult.Player.Nameplate.Badges = append(shift.Data.CoopHistoryDetail.MyResult.Player.Nameplate.Badges, badge)
+		}
+		return nil
+	}(); err != nil {
+		return nil, err
+	}
+	if err := func() error {
+		shift.Data.CoopHistoryDetail.MyResult.Weapons = []api_objects.Weapon{}
+		rows, err := db.Query("select weapon from three_salmon_player_weapon where userid=$1 and shiftId=$2 order by wave;",
+			userId, shiftId)
+		if err != nil {
+			return err
+		}
+		defer rows.Close()
+		for rows.Next() {
+			var weapon string
+			err := rows.Scan(&weapon)
+			if err != nil {
+				return err
+			}
+			shift.Data.CoopHistoryDetail.MyResult.Weapons = append(shift.Data.CoopHistoryDetail.MyResult.Weapons, api_objects.Weapon{
+				Name: weapon,
+			})
+		}
+		return nil
+	}(); err != nil {
+		return nil, err
+	}
+	if err := func() error {
+		shift.Data.CoopHistoryDetail.WaveResults = []api_objects.Wave3{}
+		rows, err := db.Query("select waveNumber, waterLevel, eventWave, deliverNorm, goldenPopCount, teamDeliverCount\nfrom three_salmon_wave\nwhere userid = $1\n  and shiftid = $2",
+			userId, shiftId)
+		if err != nil {
+			return err
+		}
+		defer rows.Close()
+		for rows.Next() {
+			var wave api_objects.Wave3
+			var event *string
+			if err := rows.Scan(&wave.WaveNumber, &wave.WaterLevel, &event, &wave.DeliverNorm, &wave.GoldenPopCount, &wave.TeamDeliverCount); err != nil {
+				return err
+			}
+			if event != nil {
+				wave.EventWave = &api_objects.EventWave{
+					ID: *event,
+				}
+				wave.EventWave.FillFromId()
+			}
+			if err := func() error {
+				wave.SpecialWeapons = []api_objects.Special{}
+				rows, err := db.Query("select special\nfrom three_salmon_wave_special\nwhere userId = $1\n  and shiftId = $2\n  and waveNumber = $3\norder by pk;",
+					userId, shiftId, wave.WaveNumber)
+				if err != nil {
+					return err
+				}
+				defer rows.Close()
+				for rows.Next() {
+					var special string
+					if err := rows.Scan(&special); err != nil {
+						return err
+					}
+					specialWeapon := api_objects.Special{ID: special}
+					specialWeapon.FillFromId()
+					wave.SpecialWeapons = append(wave.SpecialWeapons, specialWeapon)
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+			shift.Data.CoopHistoryDetail.WaveResults = append(shift.Data.CoopHistoryDetail.WaveResults, wave)
+		}
+		return nil
+	}(); err != nil {
+		return nil, err
+	}
+	if err := func() error {
+		shift.Data.CoopHistoryDetail.EnemyResults = []api_objects.EnemyResult{}
+		rows, err := db.Query("select defeatCount, teamDefeatCount, popCount, enemy\nfrom three_salmon_enemy_result\nwhere userId = $1\n  and shiftid = $2\norder by enemy;",
+			userId, shiftId)
+		if err != nil {
+			return err
+		}
+		defer rows.Close()
+		for rows.Next() {
+			var enemy api_objects.EnemyResult
+			if err := rows.Scan(&enemy.DefeatCount, &enemy.TeamDefeatCount, &enemy.PopCount, &enemy.Enemy.ID); err != nil {
+				return err
+			}
+			enemy.Enemy.FillFromId()
+			shift.Data.CoopHistoryDetail.EnemyResults = append(shift.Data.CoopHistoryDetail.EnemyResults, enemy)
+		}
+		return nil
+	}(); err != nil {
+		return nil, err
+	}
+	if err := func() error {
+		shift.Data.CoopHistoryDetail.MemberResults = []api_objects.MemberResults{}
+		rows, err := db.Query("select byname,\n       name,\n       nameId,\n       background,\n       uniform,\n       id,\n       species,\n       special,\n       defeatenemycount,\n       delivercount,\n       goldenassistcount,\n       goldendelivercount,\n       rescuecount,\n       rescuedcount\nfrom three_salmon_player\nwhere userId = $1\n  and shiftId = $2;",
+			userId, shiftId)
+		if err != nil {
+			return err
+		}
+		defer rows.Close()
+		for rows.Next() {
+			var member api_objects.MemberResults
+			if err := rows.Scan(&member.Player.Byname, &member.Player.Name, &member.Player.NameID, &member.Player.Nameplate.Background.ID, &member.Player.Uniform.ID, &member.Player.ID, &member.Player.Species, &member.SpecialWeapon.WeaponID, &member.DefeatEnemyCount, &member.DeliverCount, &member.GoldenAssistCount, &member.GoldenDeliverCount, &member.RescueCount, &member.RescuedCount); err != nil {
+				return err
+			}
+			member.SpecialWeapon.FillFromId()
+			member.Player.Uniform.FillFromId()
+			member.Player.Nameplate.Background.FillFromId()
+			member.Player.IsPlayer = "CoopPlayer"
+			if err := func() error {
+				member.Player.Nameplate.Badges = []api_objects.Badge{}
+				rows, err := db.Query("select badge\nfrom three_salmon_player_badge\nwhere userId = $1\n  and shiftId = $2\n  and playerId = $3\norder by badgeSlot;",
+					userId, shiftId, member.Player.ID)
+				if err != nil {
+					return err
+				}
+				defer rows.Close()
+				for rows.Next() {
+					var badge string
+					if err := rows.Scan(&badge); err != nil {
+						return err
+					}
+					member.Player.Nameplate.Badges = append(member.Player.Nameplate.Badges, api_objects.Badge{ID: base64.StdEncoding.EncodeToString([]byte(badge))})
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				member.Weapons = []api_objects.Weapon{}
+				rows, err := db.Query("select weapon\nfrom three_salmon_player_weapon\nwhere userid = $1\n  and shiftid = $2\n  and playerid = $3\norder by wave;",
+					userId, shiftId, member.Player.ID)
+				if err != nil {
+					return err
+				}
+				defer rows.Close()
+				for rows.Next() {
+					var weapon string
+					if err := rows.Scan(&weapon); err != nil {
+						return err
+					}
+					member.Weapons = append(member.Weapons, api_objects.Weapon{Name: weapon})
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+			member.EncodeId(shift.Data.CoopHistoryDetail.MyResult.Player.ID, shiftId, shift.Data.CoopHistoryDetail.PlayedTime)
+			shift.Data.CoopHistoryDetail.MemberResults = append(shift.Data.CoopHistoryDetail.MemberResults, member)
+		}
+		return nil
+	}(); err != nil {
+		return nil, err
+	}
+	shift.Data.CoopHistoryDetail.MyResult.EncodeId(shift.Data.CoopHistoryDetail.MyResult.Player.ID, shiftId, shift.Data.CoopHistoryDetail.PlayedTime)
+	return &shift, nil
 }
 
 func getShiftSplatnet(pk int64) (*api_objects.ShiftSplatnet, error) {
@@ -4411,14 +4143,7 @@ func getShiftStatInkAgent(pk int64) (*api_objects.ShiftStatInkAgent, error) {
 
 func ReadUser(username string) (*db_objects.User, error) {
 	user := db_objects.User{}
-	pk, err := ReadKeyArrayWithKey(username, "username", "pk", "auth_user", "asc", "pk")
-	if err != nil {
-		return nil, err
-	}
-	if err := readObjWithId(pk[0], "auth_user").Scan(
-		&user.Pk, &user.Username, &user.Password, &user.Email, &user.EmailVerified,
-	); err != nil {
-		debug.PrintStack()
+	if err := db.QueryRow("select * from auth_user where username = $1", username).Scan(&user.Pk, &user.Username, &user.Password, &user.Email, &user.EmailVerified); err != nil {
 		return nil, err
 	}
 	return &user, nil
@@ -4437,12 +4162,7 @@ func ReadUserById(pk int64) (*db_objects.User, error) {
 
 func CheckSessionToken(sessionToken string) (*int64, error) {
 	token := db_objects.SessionToken{}
-	if err := ReadValuesWithKey(sessionToken, "session_token", "auth_user_session_token", []string{
-		"parent",
-	}).Scan(
-		&token.Parent,
-	); err != nil {
-		debug.PrintStack()
+	if err := db.QueryRow("select parent from auth_user_session_token where session_token = $1", sessionToken).Scan(&token.Parent); err != nil {
 		return nil, err
 	}
 	return &token.Parent, nil
@@ -4460,4 +4180,12 @@ func getIntContainer(pk int64) (*int, error) {
 		return nil, err
 	}
 	return &result, nil
+}
+
+func checkIfShift3Exists(userId int64, shiftId string) (*bool, error) {
+	var exists bool
+	if err := db.QueryRow("select exists(select 1 from three_salmon_shift where userId=$1 and id=$2);", userId, shiftId).Scan(&exists); err != nil {
+		return nil, err
+	}
+	return &exists, nil
 }

@@ -18,7 +18,7 @@ package api_objects
 
 import "github.com/cass-dlcm/SplatStatsGo/enums"
 
-type Battle struct {
+type Battle2 struct {
 	UserId                  int64
 	SplatnetJson            *BattleSplatnet         `json:"splatnet_json,omitempty"`
 	SplatnetUpload          bool                    `json:"splatnet_upload"`

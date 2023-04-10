@@ -1,0 +1,2 @@
+drop table three_salmon_player_weapon, three_salmon_player_badge, three_salmon_player, three_salmon_enemy_result,
+    three_salmon_wave_special, three_salmon_wave, three_salmon_user_badge, three_salmon_user_weapon, three_salmon_shift;

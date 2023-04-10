@@ -9,7 +9,11 @@
  */
 package api_objects
 
-import "github.com/cass-dlcm/SplatStatsGo/enums"
+import (
+	"encoding/base64"
+	"fmt"
+	"github.com/cass-dlcm/SplatStatsGo/enums"
+)
 
 type SplatnetPlayerType struct {
 	Gender  enums.GenderEnum  `json:"style,omitempty"`
@@ -26,4 +30,58 @@ type SplatnetQuad struct {
 	ImageA string `json:"image_a"`
 	ImageB string `json:"image_b"`
 	Name   string `json:"name"`
+}
+
+type Image struct {
+	URL string `json:"url"`
+}
+
+type Background struct {
+	TextColor struct {
+		A float64 `json:"a"`
+		B float64 `json:"b"`
+		G float64 `json:"g"`
+		R float64 `json:"r"`
+	} `json:"textColor"`
+	Image Image  `json:"image"`
+	ID    string `json:"id"`
+}
+
+func (b *Background) DecodeId() error {
+	background, err := base64.StdEncoding.DecodeString(b.ID)
+	if err != nil {
+		return err
+	}
+	b.ID = string(background[20:])
+	return nil
+}
+
+func (b *Background) FillFromId() {
+	b.TextColor.A = 1
+	b.TextColor.B = 1
+	b.TextColor.G = 1
+	b.TextColor.R = 1
+	b.ID = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("NameplateBackground-%s", b.ID)))
+}
+
+type HistoryDetail struct {
+	ID string `json:"id"`
+}
+
+type Badge struct {
+	Image Image  `json:"image"`
+	ID    string `json:"id"`
+}
+
+func (b *Badge) DecodeId() error {
+	badge, err := base64.StdEncoding.DecodeString(b.ID)
+	if err != nil {
+		return err
+	}
+	b.ID = string(badge[6:])
+	return nil
+}
+
+func (b *Badge) EncodeId() {
+	b.ID = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("badge-%s", b.ID)))
 }

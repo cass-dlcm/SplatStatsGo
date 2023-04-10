@@ -17,27 +17,14 @@ package api_code
  */
 
 import (
-	"context"
 	"encoding/json"
-	"fmt"
-	"github.com/cass-dlcm/SplatStatsGo/api_objects"
 	"github.com/cass-dlcm/SplatStatsGo/db_objects"
 	"github.com/cass-dlcm/SplatStatsGo/obj_sql"
-	"github.com/cass-dlcm/SplatStatsGo/secrets"
 	"github.com/google/uuid"
-	"gitlab.com/vita/go/verify"
 	"golang.org/x/crypto/bcrypt"
-	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
-	"strings"
 	"time"
-)
-
-var client = verify.NewClient(
-	secrets.GetSecret("TWILIO_ACCOUNT_SID"),
-	secrets.GetSecret("TWILIO_AUTH_TOKEN"),
 )
 
 func GetUserByNamePage(w http.ResponseWriter, r *http.Request) {
@@ -97,64 +84,6 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Sends an email code
-	rData := map[string]string{
-		"To":                   user.Email,
-		"Channel":              "email",
-		"ChannelConfiguration": "{\"substitutions\": {\"to_email\": \"" + user.Email + "\"}}",
-	}
-	data := url.Values{}
-	data.Set("To", rData["To"])
-	data.Set("Channel", rData["Channel"])
-	data.Set("ChannelConfiguration", rData["ChannelConfiguration"])
-
-	req, err := http.NewRequestWithContext(
-		context.TODO(),
-		http.MethodPost,
-		fmt.Sprintf("https://verify.twilio.com/v2/Services/%s/Verifications", secrets.GetSecret("TWILIO_VERIFY_SERVICE_ID")),
-		strings.NewReader(data.Encode()),
-	)
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	req.SetBasicAuth(secrets.GetSecret("TWILIO_ACCOUNT_SID"), secrets.GetSecret("TWILIO_AUTH_TOKEN"))
-
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	if res.StatusCode != http.StatusCreated {
-		errorPayload := TwilioError{}
-		if err := json.Unmarshal(body, &errorPayload); err != nil {
-			log.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		log.Println(errorPayload)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	out := VerificationOutput{}
-	if err := json.Unmarshal(body, &out); err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 }
 
 func Signin(w http.ResponseWriter, r *http.Request) {
@@ -173,11 +102,6 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 		// If the structure of the body is wrong, return an HTTP error
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	if !user.EmailVerified {
-		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
@@ -210,46 +134,6 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:  "session_token",
 		Value: sessionToken,
+		Path:  "/api",
 	})
-}
-
-func VerifyEmail(w http.ResponseWriter, r *http.Request) {
-	user := &api_objects.UserVerify{}
-	vals := r.URL.Query()
-	user.Email = vals.Get("email")
-	if user.Email == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-	user.EmailCode = vals.Get("token")
-	if user.EmailCode == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-	out, err := client.NewVerificationCheck(
-		context.TODO(),
-		secrets.GetSecret("TWILIO_VERIFY_SERVICE_ID"),
-		&verify.VerificationCheckInput{
-			To:   user.Email,
-			Code: user.EmailCode,
-		},
-	)
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	log.Println(out)
-	switch out.Status {
-	case verify.StatusApproved:
-		log.Println("Approved!")
-		obj_sql.VerifyEmailUser(user.Email)
-		w.WriteHeader(http.StatusOK)
-	case verify.StatusDenied:
-		log.Println("Denied :(")
-		w.WriteHeader(http.StatusUnauthorized)
-	case verify.StatusPending:
-		log.Println("Still pending...")
-		w.WriteHeader(http.StatusInternalServerError)
-	}
 }

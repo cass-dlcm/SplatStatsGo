@@ -1,0 +1,1 @@
+drop table auth_user_session_token, auth_user;

@@ -17,7 +17,7 @@ package api_objects
 
 import "github.com/cass-dlcm/SplatStatsGo/enums"
 
-type Shift struct {
+type Shift2 struct {
 	UserId                  int64                           `json:"user_id"`
 	PlayerSplatnetId        string                          `json:"player_splatnet_id"`
 	JobId                   int64                           `json:"job_id"`

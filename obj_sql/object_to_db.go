@@ -10,14 +10,9 @@ import (
 )
 
 func WriteNewUser(user *db_objects.User) error {
-	values := make([]interface{}, 4)
-	values[0] = (*user).Username
-	values[1] = (*user).Password
-	values[2] = (*user).Email
-	values[3] = false
-	return writeIntoTable("auth_user", []string{
-		"username", "password", "email", "email_verified",
-	}, values)
+	_, err := db.Exec("insert into auth_user (username, password, email, email_verified) values ($1, $2, $3, false)",
+		user.Username, user.Password, user.Email)
+	return err
 }
 
 func btoi(b bool) int8 {
@@ -28,7 +23,7 @@ func btoi(b bool) int8 {
 	}
 }
 
-func WriteNewBattle(battle *api_objects.Battle) error {
+func WriteNewBattle(battle *api_objects.Battle2) error {
 	_, err := GetBattleLean((*battle).UserId, (*battle).BattleNumber)
 	if fmt.Sprint(err) != "sql: no rows in result set" {
 		return errors.New("battle already exists")
@@ -1065,18 +1060,6 @@ func writeNewStatInkName(name *api_objects.StatInkName) (*int64, error) {
 	}, values)
 }
 
-func writeNewShiftStatInkStageName(name *api_objects.ShiftStatInkStageName) (*int64, error) {
-	v := reflect.ValueOf(*name)
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTableGetPk("stat_ink_name", []string{
-		"de_DE", "en_GB", "en_US", "es_ES", "es_MX", "fr_CA", "fr_FR", "it_IT", "ja_JP", "nl_NL", "ru_RU", "zh_CN",
-		"zh_TW",
-	}, values)
-}
-
 func writeNewStatInkKeyName(keyName *api_objects.StatInkKeyName) (*int64, error) {
 	name, err := writeNewStatInkName(&(*keyName).Name)
 	if err != nil {
@@ -1084,24 +1067,6 @@ func writeNewStatInkKeyName(keyName *api_objects.StatInkKeyName) (*int64, error)
 	}
 	v := reflect.ValueOf(db_objects.StatInkKeyName{
 		Key:  (*keyName).Key,
-		Name: *name,
-	})
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTableGetPk("stat_ink_key_name", []string{
-		"key", "name",
-	}, values)
-}
-
-func writeNewShiftStatInkFailReason(reason *api_objects.ShiftStatInkFailReason) (*int64, error) {
-	name, err := writeNewStatInkName(&(*reason).Name)
-	if err != nil {
-		return nil, err
-	}
-	v := reflect.ValueOf(db_objects.ShiftStatInkFailReason{
-		Key:  (*reason).Key,
 		Name: *name,
 	})
 	values := make([]interface{}, v.NumField())
@@ -1605,1034 +1570,175 @@ func AddSessionToken(sessionToken, username string) error {
 	if err != nil {
 		return err
 	}
-	values := make([]interface{}, 2)
-	values[0] = (*user).Pk
-	values[1] = sessionToken
-	fmt.Println(len(sessionToken))
-	return writeIntoTable("auth_user_session_token", []string{
-		"parent", "session_token",
-	}, values)
+	_, err = db.Exec("insert into auth_user_session_token (parent, session_token) values ($1, $2)",
+		user.Pk, sessionToken)
+	return err
 }
 
-func WriteNewShift(shift *api_objects.Shift) error {
-	_, err := GetShift((*shift).UserId, (*shift).JobId)
-	if fmt.Sprint(err) != "sql: no rows in result set" {
+func WriteNewShift3(shift *api_objects.Shift3, userId int64) error {
+	if err := shift.DecodeId(); err != nil {
+		return err
+	}
+	exists, err := checkIfShift3Exists(userId, shift.Data.CoopHistoryDetail.ID)
+	if err != nil {
+		return err
+	}
+	if *exists {
 		return errors.New("shift already exists")
 	}
-	var splatnet *int64
-	if (*shift).SplatnetJson != nil {
-		splatnet, err = writeNewShiftSplatnet((*shift).SplatnetJson)
-		if err != nil {
+	if err := shift.Data.CoopHistoryDetail.AfterGrade.DecodeId(); err != nil {
+		return err
+	}
+	if err := shift.Data.CoopHistoryDetail.MyResult.Player.Nameplate.Background.DecodeId(); err != nil {
+		return err
+	}
+	if err := shift.Data.CoopHistoryDetail.MyResult.Player.Uniform.DecodeId(); err != nil {
+		return err
+	}
+	if err := shift.Data.CoopHistoryDetail.MyResult.DecodeId(); err != nil {
+		return err
+	}
+	if err := shift.Data.CoopHistoryDetail.CoopStage.DecodeId(); err != nil {
+		return err
+	}
+	if shift.Data.CoopHistoryDetail.BossResult != nil {
+		if err := shift.Data.CoopHistoryDetail.BossResult.Boss.DecodeId(); err != nil {
+			return err
+		}
+		if _, err := db.Exec("insert into three_salmon_shift (userId, typename, id, afterGrade, playerByname, playerBackground, playerName,\n                                playerNameId, playerUniform, playerId, playerSpecies, playerSpecialWeapon,\n                                playerDefeatEnemyCount, playerDeliverCount, playerGoldenAssistCount,\n                                playerGoldenDeliverCount, playerRescueCount, playerRescuedCount, resultWave, playedTime,\n                                rule, stage, dangerRate, scenarioCode, smellMeter, afterGradePoint, scaleBronze,\n                                scaleSilver, scaleGold, jobPoint, jobScore, jobRate, jobBonus, hasDefeatBoss, boss)\nvalues ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24,\n        $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35);",
+			userId, shift.Data.CoopHistoryDetail.Typename, shift.Data.CoopHistoryDetail.ID, shift.Data.CoopHistoryDetail.AfterGrade.ID,
+			shift.Data.CoopHistoryDetail.MyResult.Player.Byname, shift.Data.CoopHistoryDetail.MyResult.Player.Nameplate.Background.ID,
+			shift.Data.CoopHistoryDetail.MyResult.Player.Name, shift.Data.CoopHistoryDetail.MyResult.Player.NameID,
+			shift.Data.CoopHistoryDetail.MyResult.Player.Uniform.ID, shift.Data.CoopHistoryDetail.MyResult.Player.ID,
+			shift.Data.CoopHistoryDetail.MyResult.Player.Species,
+			shift.Data.CoopHistoryDetail.MyResult.SpecialWeapon.WeaponID,
+			shift.Data.CoopHistoryDetail.MyResult.DefeatEnemyCount,
+			shift.Data.CoopHistoryDetail.MyResult.DeliverCount,
+			shift.Data.CoopHistoryDetail.MyResult.GoldenAssistCount,
+			shift.Data.CoopHistoryDetail.MyResult.GoldenDeliverCount,
+			shift.Data.CoopHistoryDetail.MyResult.RescueCount,
+			shift.Data.CoopHistoryDetail.MyResult.RescuedCount, shift.Data.CoopHistoryDetail.ResultWave,
+			shift.Data.CoopHistoryDetail.PlayedTime, shift.Data.CoopHistoryDetail.Rule, shift.Data.CoopHistoryDetail.CoopStage.ID,
+			shift.Data.CoopHistoryDetail.DangerRate, shift.Data.CoopHistoryDetail.ScenarioCode,
+			shift.Data.CoopHistoryDetail.SmellMeter, shift.Data.CoopHistoryDetail.AfterGradePoint,
+			shift.Data.CoopHistoryDetail.Scale.Bronze, shift.Data.CoopHistoryDetail.Scale.Silver,
+			shift.Data.CoopHistoryDetail.Scale.Gold, shift.Data.CoopHistoryDetail.JobPoint,
+			shift.Data.CoopHistoryDetail.JobScore, shift.Data.CoopHistoryDetail.JobRate,
+			shift.Data.CoopHistoryDetail.JobBonus, shift.Data.CoopHistoryDetail.BossResult.HasDefeatBoss, shift.Data.CoopHistoryDetail.BossResult.Boss.ID,
+		); err != nil {
+			return err
+		}
+	} else {
+		if _, err := db.Exec("insert into three_salmon_shift (userId, typename, id, afterGrade, playerByname, playerBackground, playerName,\n                                playerNameId, playerUniform, playerId, playerSpecies, playerSpecialWeapon,\n                                playerDefeatEnemyCount, playerDeliverCount, playerGoldenAssistCount,\n                                playerGoldenDeliverCount, playerRescueCount, playerRescuedCount, resultWave, playedTime,\n                                rule, stage, dangerRate, scenarioCode, smellMeter, afterGradePoint, jobPoint, jobScore,\n                                jobRate, jobBonus)\nvalues ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24,\n        $25, $26, $27, $28, $29, $30);",
+			userId, shift.Data.CoopHistoryDetail.Typename, shift.Data.CoopHistoryDetail.ID, shift.Data.CoopHistoryDetail.AfterGrade.ID,
+			shift.Data.CoopHistoryDetail.MyResult.Player.Byname, shift.Data.CoopHistoryDetail.MyResult.Player.Nameplate.Background.ID,
+			shift.Data.CoopHistoryDetail.MyResult.Player.Name,
+			shift.Data.CoopHistoryDetail.MyResult.Player.NameID,
+			shift.Data.CoopHistoryDetail.MyResult.Player.Uniform.ID, shift.Data.CoopHistoryDetail.MyResult.Player.ID,
+			shift.Data.CoopHistoryDetail.MyResult.Player.Species,
+			shift.Data.CoopHistoryDetail.MyResult.SpecialWeapon.WeaponID,
+			shift.Data.CoopHistoryDetail.MyResult.DefeatEnemyCount,
+			shift.Data.CoopHistoryDetail.MyResult.DeliverCount,
+			shift.Data.CoopHistoryDetail.MyResult.GoldenAssistCount,
+			shift.Data.CoopHistoryDetail.MyResult.GoldenDeliverCount,
+			shift.Data.CoopHistoryDetail.MyResult.RescueCount,
+			shift.Data.CoopHistoryDetail.MyResult.RescuedCount, shift.Data.CoopHistoryDetail.ResultWave,
+			shift.Data.CoopHistoryDetail.PlayedTime, shift.Data.CoopHistoryDetail.Rule, shift.Data.CoopHistoryDetail.CoopStage.ID,
+			shift.Data.CoopHistoryDetail.DangerRate, shift.Data.CoopHistoryDetail.ScenarioCode,
+			shift.Data.CoopHistoryDetail.SmellMeter, shift.Data.CoopHistoryDetail.AfterGradePoint,
+			shift.Data.CoopHistoryDetail.JobPoint, shift.Data.CoopHistoryDetail.JobScore,
+			shift.Data.CoopHistoryDetail.JobRate, shift.Data.CoopHistoryDetail.JobBonus,
+		); err != nil {
 			return err
 		}
 	}
-	var statInk *int64
-	if (*shift).StatInkJson != nil {
-		statInk, err = writeNewShiftStatInk((*shift).StatInkJson)
-		if err != nil {
+	for i, b := range shift.Data.CoopHistoryDetail.MyResult.Player.Nameplate.Badges {
+		if err := b.DecodeId(); err != nil {
+			return err
+		}
+		if _, err := db.Exec("insert into three_salmon_user_badge (userId, shiftId, badgeSlot, badge) values ($1, $2, $3, $4);",
+			userId, shift.Data.CoopHistoryDetail.ID, i, b.ID); err != nil {
 			return err
 		}
 	}
-	v := reflect.ValueOf(db_objects.Shift{
-		UserId:                  (*shift).UserId,
-		PlayerSplatnetId:        (*shift).PlayerSplatnetId,
-		JobId:                   (*shift).JobId,
-		SplatnetJson:            splatnet,
-		StatInkJson:             statInk,
-		StartTime:               (*shift).StartTime,
-		PlayTime:                (*shift).PlayTime,
-		EndTime:                 (*shift).EndTime,
-		DangerRate:              (*shift).DangerRate,
-		IsClear:                 (*shift).IsClear,
-		JobFailureReason:        (*shift).JobFailureReason,
-		FailureWave:             (*shift).FailureWave,
-		GradePoint:              (*shift).GradePoint,
-		GradePointDelta:         (*shift).GradePointDelta,
-		JobScore:                (*shift).JobScore,
-		DrizzlerCount:           (*shift).DrizzlerCount,
-		FlyfishCount:            (*shift).FlyfishCount,
-		GoldieCount:             (*shift).GoldieCount,
-		GrillerCount:            (*shift).GrillerCount,
-		MawsCount:               (*shift).MawsCount,
-		ScrapperCount:           (*shift).ScrapperCount,
-		SteelEelCount:           (*shift).SteelEelCount,
-		SteelheadCount:          (*shift).SteelheadCount,
-		StingerCount:            (*shift).StingerCount,
-		Stage:                   (*shift).Stage,
-		PlayerName:              (*shift).PlayerName,
-		PlayerDeathCount:        (*shift).PlayerDeathCount,
-		PlayerReviveCount:       (*shift).PlayerReviveCount,
-		PlayerGoldenEggs:        (*shift).PlayerGoldenEggs,
-		PlayerPowerEggs:         (*shift).PlayerPowerEggs,
-		PlayerSpecial:           (*shift).PlayerSpecial,
-		PlayerTitle:             (*shift).PlayerTitle,
-		PlayerSpecies:           (*shift).PlayerSpecies,
-		PlayerGender:            (*shift).PlayerGender,
-		PlayerW1Specials:        (*shift).PlayerW1Specials,
-		PlayerW2Specials:        (*shift).PlayerW2Specials,
-		PlayerW3Specials:        (*shift).PlayerW3Specials,
-		PlayerW1Weapon:          (*shift).PlayerW1Weapon,
-		PlayerW2Weapon:          (*shift).PlayerW2Weapon,
-		PlayerW3Weapon:          (*shift).PlayerW3Weapon,
-		PlayerDrizzlerKills:     (*shift).PlayerDrizzlerKills,
-		PlayerFlyfishKills:      (*shift).PlayerFlyfishKills,
-		PlayerGoldieKills:       (*shift).PlayerGoldieKills,
-		PlayerGrillerKills:      (*shift).PlayerGrillerKills,
-		PlayerMawsKills:         (*shift).PlayerMawsKills,
-		PlayerScrapperKills:     (*shift).PlayerScrapperKills,
-		PlayerSteelEelKills:     (*shift).PlayerSteelEelKills,
-		PlayerSteelheadKills:    (*shift).PlayerSteelheadKills,
-		PlayerStingerKills:      (*shift).PlayerStingerKills,
-		Teammate0SplatnetId:     (*shift).Teammate0SplatnetId,
-		Teammate0Name:           (*shift).Teammate0Name,
-		Teammate0DeathCount:     (*shift).Teammate0DeathCount,
-		Teammate0ReviveCount:    (*shift).Teammate0ReviveCount,
-		Teammate0GoldenEggs:     (*shift).Teammate0GoldenEggs,
-		Teammate0PowerEggs:      (*shift).Teammate0PowerEggs,
-		Teammate0Special:        (*shift).Teammate0Special,
-		Teammate0Species:        (*shift).Teammate0Species,
-		Teammate0Gender:         (*shift).Teammate0Gender,
-		Teammate0W1Specials:     (*shift).Teammate0W1Specials,
-		Teammate0W2Specials:     (*shift).Teammate0W2Specials,
-		Teammate0W3Specials:     (*shift).Teammate0W3Specials,
-		Teammate0W1Weapon:       (*shift).Teammate0W1Weapon,
-		Teammate0W2Weapon:       (*shift).Teammate0W2Weapon,
-		Teammate0W3Weapon:       (*shift).Teammate0W3Weapon,
-		Teammate0DrizzlerKills:  (*shift).Teammate0DrizzlerKills,
-		Teammate0FlyfishKills:   (*shift).Teammate0FlyfishKills,
-		Teammate0GoldieKills:    (*shift).Teammate0GoldieKills,
-		Teammate0GrillerKills:   (*shift).Teammate0GrillerKills,
-		Teammate0MawsKills:      (*shift).Teammate0MawsKills,
-		Teammate0ScrapperKills:  (*shift).Teammate0ScrapperKills,
-		Teammate0SteelEelKills:  (*shift).Teammate0SteelEelKills,
-		Teammate0SteelheadKills: (*shift).Teammate0SteelheadKills,
-		Teammate0StingerKills:   (*shift).Teammate0StingerKills,
-		Teammate1SplatnetId:     (*shift).Teammate1SplatnetId,
-		Teammate1Name:           (*shift).Teammate1Name,
-		Teammate1DeathCount:     (*shift).Teammate1DeathCount,
-		Teammate1ReviveCount:    (*shift).Teammate1ReviveCount,
-		Teammate1GoldenEggs:     (*shift).Teammate1GoldenEggs,
-		Teammate1PowerEggs:      (*shift).Teammate1PowerEggs,
-		Teammate1Special:        (*shift).Teammate1Special,
-		Teammate1Species:        (*shift).Teammate1Species,
-		Teammate1Gender:         (*shift).Teammate1Gender,
-		Teammate1W1Specials:     (*shift).Teammate1W1Specials,
-		Teammate1W2Specials:     (*shift).Teammate1W2Specials,
-		Teammate1W3Specials:     (*shift).Teammate1W3Specials,
-		Teammate1W1Weapon:       (*shift).Teammate1W1Weapon,
-		Teammate1W2Weapon:       (*shift).Teammate1W2Weapon,
-		Teammate1W3Weapon:       (*shift).Teammate1W3Weapon,
-		Teammate1DrizzlerKills:  (*shift).Teammate1DrizzlerKills,
-		Teammate1FlyfishKills:   (*shift).Teammate1FlyfishKills,
-		Teammate1GoldieKills:    (*shift).Teammate1GoldieKills,
-		Teammate1GrillerKills:   (*shift).Teammate1GrillerKills,
-		Teammate1MawsKills:      (*shift).Teammate1MawsKills,
-		Teammate1ScrapperKills:  (*shift).Teammate1ScrapperKills,
-		Teammate1SteelEelKills:  (*shift).Teammate1SteelEelKills,
-		Teammate1SteelheadKills: (*shift).Teammate1SteelheadKills,
-		Teammate1StingerKills:   (*shift).Teammate1StingerKills,
-		Teammate2SplatnetId:     (*shift).Teammate2SplatnetId,
-		Teammate2Name:           (*shift).Teammate2Name,
-		Teammate2DeathCount:     (*shift).Teammate2DeathCount,
-		Teammate2ReviveCount:    (*shift).Teammate2ReviveCount,
-		Teammate2GoldenEggs:     (*shift).Teammate2GoldenEggs,
-		Teammate2PowerEggs:      (*shift).Teammate2PowerEggs,
-		Teammate2Special:        (*shift).Teammate2Special,
-		Teammate2Species:        (*shift).Teammate2Species,
-		Teammate2Gender:         (*shift).Teammate2Gender,
-		Teammate2W1Specials:     (*shift).Teammate2W1Specials,
-		Teammate2W2Specials:     (*shift).Teammate2W2Specials,
-		Teammate2W3Specials:     (*shift).Teammate2W3Specials,
-		Teammate2W1Weapon:       (*shift).Teammate2W1Weapon,
-		Teammate2W2Weapon:       (*shift).Teammate2W2Weapon,
-		Teammate2W3Weapon:       (*shift).Teammate2W3Weapon,
-		Teammate2DrizzlerKills:  (*shift).Teammate2DrizzlerKills,
-		Teammate2FlyfishKills:   (*shift).Teammate2FlyfishKills,
-		Teammate2GoldieKills:    (*shift).Teammate2GoldieKills,
-		Teammate2GrillerKills:   (*shift).Teammate2GrillerKills,
-		Teammate2MawsKills:      (*shift).Teammate2MawsKills,
-		Teammate2ScrapperKills:  (*shift).Teammate2ScrapperKills,
-		Teammate2SteelEelKills:  (*shift).Teammate2SteelEelKills,
-		Teammate2SteelheadKills: (*shift).Teammate2SteelheadKills,
-		Teammate2StingerKills:   (*shift).Teammate2StingerKills,
-		ScheduleEndTime:         (*shift).ScheduleEndTime,
-		ScheduleStartTime:       &(*shift).ScheduleStartTime,
-		ScheduleWeapon0:         (*shift).ScheduleWeapon0,
-		ScheduleWeapon1:         (*shift).ScheduleWeapon1,
-		ScheduleWeapon2:         (*shift).ScheduleWeapon2,
-		ScheduleWeapon3:         (*shift).ScheduleWeapon3,
-		Wave1WaterLevel:         (*shift).Wave1WaterLevel,
-		Wave1EventType:          (*shift).Wave1EventType,
-		Wave1GoldenIkuraNum:     (*shift).Wave1GoldenDelivered,
-		Wave1GoldenIkuraPopNum:  (*shift).Wave1GoldenAppear,
-		Wave1IkuraNum:           (*shift).Wave1PowerEggs,
-		Wave1QuotaNum:           (*shift).Wave1Quota,
-		Wave2WaterLevel:         (*shift).Wave2WaterLevel,
-		Wave2EventType:          (*shift).Wave2EventType,
-		Wave2GoldenIkuraNum:     (*shift).Wave2GoldenDelivered,
-		Wave2GoldenIkuraPopNum:  (*shift).Wave2GoldenAppear,
-		Wave2IkuraNum:           (*shift).Wave2PowerEggs,
-		Wave2QuotaNum:           (*shift).Wave2Quota,
-		Wave3WaterLevel:         (*shift).Wave3WaterLevel,
-		Wave3EventType:          (*shift).Wave3EventType,
-		Wave3GoldenIkuraNum:     (*shift).Wave3GoldenDelivered,
-		Wave3GoldenIkuraPopNum:  (*shift).Wave3GoldenAppear,
-		Wave3IkuraNum:           (*shift).Wave3PowerEggs,
-		Wave3QuotaNum:           (*shift).Wave3Quota,
-	})
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTable("two_salmon_shift", []string{
-		"user_id", "player_splatnet_id", "splatnet_number", "splatnet_json",
-		"stat_ink_json", "start_time", "play_time", "end_time", "danger_rate", "is_clear", "job_failure_reason",
-		"failure_wave", "grade_point", "grade_point_delta", "job_score", "drizzler_count", "flyfish_count",
-		"goldie_count", "griller_count", "maws_count", "scrapper_count", "steel_eel_count", "steelhead_count",
-		"stinger_count", "stage",
-		"player_name", "player_death_count", "player_revive_count", "player_golden_eggs", "player_power_eggs",
-		"player_special", "player_title", "player_species", "player_gender", "player_w1_specials", "player_w2_specials",
-		"player_w3_specials", "player_w1_weapon", "player_w2_weapon", "player_w3_weapon", "player_drizzler_kills",
-		"player_flyfish_kills", "player_goldie_kills", "player_griller_kills", "player_maws_kills",
-		"player_scrapper_kills", "player_steel_eel_kills", "player_steelhead_kills", "player_stinger_kills",
-		"teammate0_splatnet_id", "teammate0_name", "teammate0_death_count", "teammate0_revive_count",
-		"teammate0_golden_eggs", "teammate0_power_eggs", "teammate0_special", "teammate0_species", "teammate0_gender",
-		"teammate0_w1_specials", "teammate0_w2_specials", "teammate0_w3_specials", "teammate0_w1_weapon",
-		"teammate0_w2_weapon", "teammate0_w3_weapon", "teammate0_drizzler_kills", "teammate0_flyfish_kills",
-		"teammate0_goldie_kills", "teammate0_griller_kills", "teammate0_maws_kills", "teammate0_scrapper_kills",
-		"teammate0_steel_eel_kills", "teammate0_steelhead_kills", "teammate0_stinger_kills",
-		"teammate1_splatnet_id", "teammate1_name", "teammate1_death_count", "teammate1_revive_count",
-		"teammate1_golden_eggs", "teammate1_power_eggs", "teammate1_special", "teammate1_species", "teammate1_gender",
-		"teammate1_w1_specials", "teammate1_w2_specials", "teammate1_w3_specials", "teammate1_w1_weapon",
-		"teammate1_w2_weapon", "teammate1_w3_weapon", "teammate1_drizzler_kills", "teammate1_flyfish_kills",
-		"teammate1_goldie_kills", "teammate1_griller_kills", "teammate1_maws_kills", "teammate1_scrapper_kills",
-		"teammate1_steel_eel_kills", "teammate1_steelhead_kills", "teammate1_stinger_kills",
-		"teammate2_splatnet_id", "teammate2_name", "teammate2_death_count", "teammate2_revive_count",
-		"teammate2_golden_eggs", "teammate2_power_eggs", "teammate2_special", "teammate2_species", "teammate2_gender",
-		"teammate2_w1_specials", "teammate2_w2_specials", "teammate2_w3_specials", "teammate2_w1_weapon",
-		"teammate2_w2_weapon", "teammate2_w3_weapon", "teammate2_drizzler_kills", "teammate2_flyfish_kills",
-		"teammate2_goldie_kills", "teammate2_griller_kills", "teammate2_maws_kills", "teammate2_scrapper_kills",
-		"teammate2_steel_eel_kills", "teammate2_steelhead_kills", "teammate2_stinger_kills",
-		"schedule_end_time", "schedule_start_time", "schedule_weapon0", "schedule_weapon1", "schedule_weapon2",
-		"schedule_weapon3",
-		"wave1_water_level", "wave1_event_type", "wave1_golden_ikura_num", "wave1_golden_ikura_pop_num",
-		"wave1_ikura_num", "wave1_quota_num",
-		"wave2_water_level", "wave2_event_type", "wave2_golden_ikura_num", "wave2_golden_ikura_pop_num",
-		"wave2_ikura_num", "wave2_quota_num",
-		"wave3_water_level", "wave3_event_type", "wave3_golden_ikura_num", "wave3_golden_ikura_pop_num",
-		"wave3_ikura_num", "wave3_quota_num",
-	}, values)
-}
-
-func writeNewShiftSplatnet(shift *api_objects.ShiftSplatnet) (*int64, error) {
-	jobResult, err := writeNewShiftsplatnetJobResult(&(*shift).JobResult)
-	if err != nil {
-		return nil, err
-	}
-	playerType, err := writeNewSplatnetPlayerType(&(*shift).PlayerType)
-	if err != nil {
-		return nil, err
-	}
-	bossCounts, err := writeNewShiftSplatnetBossCounts(&(*shift).BossCounts)
-	if err != nil {
-		return nil, err
-	}
-	myResult, err := writeNewShiftSplatnetPlayer(&(*shift).MyResult)
-	if err != nil {
-		return nil, err
-	}
-	grade, err := writeNewShiftSplatnetGrade(&(*shift).Grade)
-	if err != nil {
-		return nil, err
-	}
-	schedule, err := writeNewShiftSplatnetSchedule(&(*shift).Schedule)
-	if err != nil {
-		return nil, err
-	}
-	v := reflect.ValueOf(db_objects.ShiftSplatnet{
-		JobId:           (*shift).JobId,
-		DangerRate:      (*shift).DangerRate,
-		JobResult:       *jobResult,
-		JobScore:        (*shift).JobScore,
-		JobRate:         (*shift).JobRate,
-		GradePoint:      (*shift).GradePoint,
-		GradePointDelta: (*shift).GradePointDelta,
-		KumaPoint:       (*shift).KumaPoint,
-		StartTime:       (*shift).StartTime,
-		PlayerType:      *playerType,
-		PlayTime:        (*shift).PlayTime,
-		BossCounts:      *bossCounts,
-		EndTime:         (*shift).EndTime,
-		MyResult:        *myResult,
-		Grade:           *grade,
-		Schedule:        *schedule,
-	})
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	pk, err := writeIntoTableGetPk("two_salmon_shift_splatnet", []string{
-		"job_id",
-		"danger_rate", "job_result", "job_score", "job_rate", "grade_point", "grade_point_delta", "kuma_point",
-		"start_time", "player_type", "play_time", "boss_counts", "end_time", "my_result", "grade", "schedule",
-	}, values)
-	if err != nil {
-		return nil, err
-	}
-	for i := range (*shift).OtherResults {
-		if _, err := writeNewShiftSplatnetPlayerContainer(*pk, &(*shift).OtherResults[i]); err != nil {
-			return nil, err
+	for i, w := range shift.Data.CoopHistoryDetail.MyResult.Weapons {
+		if _, err := db.Exec("insert into three_salmon_user_weapon (userId, shiftId, wave, weapon) values ($1, $2, $3, $4);",
+			userId, shift.Data.CoopHistoryDetail.ID, i+1, w.Name); err != nil {
+			return err
 		}
 	}
-	for i := range (*shift).WaveDetails {
-		if _, err := writeNewShiftSplatnetWave(*pk, &(*shift).WaveDetails[i]); err != nil {
-			return nil, err
+	for _, w := range shift.Data.CoopHistoryDetail.WaveResults {
+		if w.EventWave != nil {
+			if err := w.EventWave.DecodeId(); err != nil {
+				return err
+			}
+			if _, err := db.Exec("insert into three_salmon_wave (userId, shiftId, waveNumber, waterLevel, eventWave, deliverNorm, goldenPopCount,\n                               teamDeliverCount)\nVALUES ($1, $2, $3, $4, $5, $6, $7, $8);",
+				userId, shift.Data.CoopHistoryDetail.ID, w.WaveNumber, w.WaterLevel, w.EventWave.ID, w.DeliverNorm, w.GoldenPopCount, w.TeamDeliverCount); err != nil {
+				return err
+			}
+		} else {
+			if _, err := db.Exec("insert into three_salmon_wave (userId, shiftId, waveNumber, waterLevel, deliverNorm, goldenPopCount,\n                               teamDeliverCount)\nVALUES ($1, $2, $3, $4, $5, $6, $7);",
+				userId, shift.Data.CoopHistoryDetail.ID, w.WaveNumber, w.WaterLevel, w.DeliverNorm, w.GoldenPopCount, w.TeamDeliverCount); err != nil {
+				return err
+			}
+		}
+		for _, we := range w.SpecialWeapons {
+			if err := we.DecodeId(); err != nil {
+				return err
+			}
+			if _, err := db.Exec("insert into three_salmon_wave_special (userId, shiftId, waveNumber, special) values ($1, $2, $3, $4);",
+				userId, shift.Data.CoopHistoryDetail.ID, w.WaveNumber, we.ID); err != nil {
+				return err
+			}
 		}
 	}
-	return pk, nil
-}
-
-func writeNewShiftStatInk(shift *api_objects.ShiftStatInk) (*int64, error) {
-	user, err := writeNewShiftStatInkUser(&(*shift).User)
-	if err != nil {
-		return nil, err
-	}
-	stage, err := writeNewShiftStatInkStage(&(*shift).Stage)
-	if err != nil {
-		return nil, err
-	}
-	var failReason *int64
-	if (*shift).FailReason != nil {
-		failReason, err = writeNewShiftStatInkFailReason((*shift).FailReason)
-		if err != nil {
-			return nil, err
+	for _, e := range shift.Data.CoopHistoryDetail.EnemyResults {
+		if err := e.Enemy.DecodeId(); err != nil {
+			return err
+		}
+		if _, err := db.Exec("insert into three_salmon_enemy_result (userId, shiftID, defeatCount, teamDefeatCount, popCount, enemy) values ($1, $2, $3, $4, $5, $6);",
+			userId, shift.Data.CoopHistoryDetail.ID, e.DefeatCount, e.TeamDefeatCount, e.PopCount, e.Enemy.ID); err != nil {
+			return err
 		}
 	}
-	title, err := writeNewShiftStatInkTitle(&(*shift).Title)
-	if err != nil {
-		return nil, err
-	}
-	titleAfter, err := writeNewShiftStatInkTitle(&(*shift).TitleAfter)
-	if err != nil {
-		return nil, err
-	}
-	myData, err := writeNewShiftStatInkPlayer(&(*shift).MyData)
-	if err != nil {
-		return nil, err
-	}
-	agent, err := writeNewShiftStatInkAgent(&(*shift).Agent)
-	if err != nil {
-		return nil, err
-	}
-	shiftStartAt, err := writeNewStatInkTime(&(*shift).ShiftStartAt)
-	if err != nil {
-		return nil, err
-	}
-	startAt, err := writeNewStatInkTime(&(*shift).StartAt)
-	if err != nil {
-		return nil, err
-	}
-	registerAt, err := writeNewStatInkTime(&(*shift).RegisterAt)
-	if err != nil {
-		return nil, err
-	}
-	v := reflect.ValueOf(db_objects.ShiftStatInk{
-		Id:             (*shift).Id,
-		Uuid:           (*shift).Uuid,
-		SplatnetNumber: (*shift).SplatnetNumber,
-		Url:            (*shift).Url,
-		ApiEndpoint:    (*shift).ApiEndpoint,
-		User:           *user,
-		Stage:          *stage,
-		IsCleared:      (*shift).IsCleared,
-		FailReason:     failReason,
-		ClearWaves:     (*shift).ClearWaves,
-		DangerRate:     (*shift).DangerRate,
-		Title:          *title,
-		TitleExp:       (*shift).TitleExp,
-		TitleAfter:     *titleAfter,
-		TitleExpAfter:  (*shift).TitleExpAfter,
-		MyData:         *myData,
-		Agent:          *agent,
-		Automated:      (*shift).Automated,
-		//Note:           (*shift).Note,
-		//LinkUrl:        (*shift).LinkUrl,
-		ShiftStartAt: *shiftStartAt,
-		StartAt:      *startAt,
-		//EndAt:          (*shift).EndAt,
-		RegisterAt: *registerAt,
-	})
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	pk, err := writeIntoTableGetPk("two_salmon_shift_stat_ink", []string{
-		"id", "uuid", "splatnet_number", "url", "api_endpoint", "user", "stage", "is_cleared", "fail_reason",
-		"clear_waves", "danger_rate", "title", "title_exp", "title_after", "title_exp_after", "my_data", "agent",
-		"automated",
-		//"note", "link_url",
-		"shift_start_at", "start_at",
-		//"end_at",
-		"register_at",
-	}, values)
-	if err != nil {
-		return nil, err
-	}
-	for i := range (*shift).Quota {
-		if _, err := writeNewIntContainer(*pk, "two_salmon_shift_stat_ink", (*shift).Quota[i]); err != nil {
-			return nil, err
+	for _, p := range shift.Data.CoopHistoryDetail.MemberResults {
+		if err := p.DecodeId(); err != nil {
+			return err
+		}
+		if err := p.Player.Nameplate.Background.DecodeId(); err != nil {
+			return err
+		}
+		if err := p.Player.Uniform.DecodeId(); err != nil {
+			return err
+		}
+		if _, err := db.Exec("insert into three_salmon_player (userId, shiftId, byname, name, nameId, background, uniform, id,\n                                  species, special, defeatEnemyCount, deliverCount, goldenAssistCount,\n                                  goldenDeliverCount, rescueCount, rescuedCount)\nvalues ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16);",
+			userId, shift.Data.CoopHistoryDetail.ID, p.Player.Byname, p.Player.Name, p.Player.NameID,
+			p.Player.Nameplate.Background.ID, p.Player.Uniform.ID, p.Player.ID, p.Player.Species, p.SpecialWeapon.WeaponID,
+			p.DefeatEnemyCount, p.DeliverCount, p.GoldenAssistCount, p.GoldenDeliverCount, p.RescueCount,
+			p.RescuedCount); err != nil {
+			return err
+		}
+		for i, w := range p.Weapons {
+			if _, err := db.Exec("insert into three_salmon_player_weapon (userId, shiftId, playerId, wave, weapon) values ($1, $2, $3, $4, $5);",
+				userId, shift.Data.CoopHistoryDetail.ID, p.Player.ID, i+1, w.Name); err != nil {
+				return err
+			}
+		}
+		for i, b := range p.Player.Nameplate.Badges {
+			if err := b.DecodeId(); err != nil {
+				return err
+			}
+			if _, err := db.Exec("insert into three_salmon_player_badge (userId, shiftId, playerId, badgeSlot, badge) values ($1, $2, $3, $4, $5);",
+				userId, shift.Data.CoopHistoryDetail.ID, p.Player.ID, i, b.ID); err != nil {
+
+			}
 		}
 	}
-	for i := range (*shift).BossAppearances {
-		if _, err := writeNewShiftStatInkBossData(*pk, "two_salmon_shift_stat_ink", &(*shift).BossAppearances[i]); err != nil {
-			return nil, err
-		}
-	}
-	for i := range (*shift).Waves {
-		if _, err := writeNewShiftStatInkWave(*pk, &(*shift).Waves[i]); err != nil {
-			return nil, err
-		}
-	}
-	for i := range (*shift).Teammates {
-		if _, err := writeNewShiftStatInkPlayerContainer(*pk, &(*shift).Teammates[i]); err != nil {
-			return nil, err
-		}
-	}
-	return pk, nil
+	return nil
 }
 
-func writeNewShiftsplatnetJobResult(result *api_objects.ShiftSplatnetJobResult) (*int64, error) {
-	v := reflect.ValueOf(*result)
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTableGetPk("two_salmon_shift_splatnet_job_result", []string{
-		"is_clear", "failure_reason", "failure_wave",
-	}, values)
-}
-
-func writeNewShiftSplatnetBossCounts(counts *api_objects.ShiftSplatnetBossCounts) (*int64, error) {
-	var3, err := writeNewShiftSplatnetBossCountsBoss(&(*counts).Goldie)
-	if err != nil {
-		return nil, err
-	}
-	var6, err := writeNewShiftSplatnetBossCountsBoss(&(*counts).Steelhead)
-	if err != nil {
-		return nil, err
-	}
-	var9, err := writeNewShiftSplatnetBossCountsBoss(&(*counts).Flyfish)
-	if err != nil {
-		return nil, err
-	}
-	var12, err := writeNewShiftSplatnetBossCountsBoss(&(*counts).Scrapper)
-	if err != nil {
-		return nil, err
-	}
-	var13, err := writeNewShiftSplatnetBossCountsBoss(&(*counts).SteelEel)
-	if err != nil {
-		return nil, err
-	}
-	var14, err := writeNewShiftSplatnetBossCountsBoss(&(*counts).Stinger)
-	if err != nil {
-		return nil, err
-	}
-	var15, err := writeNewShiftSplatnetBossCountsBoss(&(*counts).Maws)
-	if err != nil {
-		return nil, err
-	}
-	var16, err := writeNewShiftSplatnetBossCountsBoss(&(*counts).Griller)
-	if err != nil {
-		return nil, err
-	}
-	var21, err := writeNewShiftSplatnetBossCountsBoss(&(*counts).Drizzler)
-	if err != nil {
-		return nil, err
-	}
-	v := reflect.ValueOf(db_objects.ShiftSplatnetBossCounts{
-		Var3:  *var3,
-		Var6:  *var6,
-		Var9:  *var9,
-		Var12: *var12,
-		Var13: *var13,
-		Var14: *var14,
-		Var15: *var15,
-		Var16: *var16,
-		Var21: *var21,
-	})
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTableGetPk("two_salmon_shift_splatnet_boss_counts", []string{
-		"var3", "var6", "var9", "var12", "var13", "var14", "var15", "var16", "var21",
-	}, values)
-}
-
-func writeNewShiftSplatnetPlayer(player *api_objects.ShiftSplatnetPlayer) (*int64, error) {
-	special, err := writeNewSplatnetQuad(&(*player).Special)
-	if err != nil {
-		return nil, err
-	}
-	playerType, err := writeNewSplatnetPlayerType(&(*player).PlayerType)
-	if err != nil {
-		return nil, err
-	}
-	bossKillCounts, err := writeNewShiftSplatnetBossCounts(&(*player).BossKillCounts)
-	if err != nil {
-		return nil, err
-	}
-	v := reflect.ValueOf(db_objects.ShiftSplatnetPlayer{
-		Special:        *special,
-		Pid:            (*player).Pid,
-		PlayerType:     *playerType,
-		Name:           (*player).Name,
-		DeadCount:      (*player).DeadCount,
-		GoldenIkuraNum: (*player).GoldenEggs,
-		BossKillCounts: *bossKillCounts,
-		IkuraNum:       (*player).PowerEggs,
-		HelpCount:      (*player).HelpCount,
-	})
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	pk, err := writeIntoTableGetPk("two_salmon_shift_splatnet_player", []string{
-		"special", "pid", "player_type", "name", "dead_count", "golden_ikura_num", "boss_kill_counts", "ikura_num",
-		"help_count",
-	}, values)
-	if err != nil {
-		return nil, err
-	}
-	for i := range (*player).SpecialCounts {
-		if _, err := writeNewIntContainer(*pk, "two_salmon_shift_splatnet_boss_counts", (*player).SpecialCounts[i]); err != nil {
-			return nil, err
-		}
-	}
-	for i := range (*player).WeaponList {
-		if _, err := writeNewShiftSplatnetPlayerWeaponList(*pk, &(*player).WeaponList[i]); err != nil {
-			return nil, err
-		}
-	}
-	return pk, nil
-}
-
-func writeNewShiftSplatnetGrade(grade *api_objects.ShiftSplatnetGrade) (*int64, error) {
-	v := reflect.ValueOf(*grade)
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTableGetPk("two_salmon_shift_splatnet_grade", []string{
-		"id", "short_name", "long_name", "name",
-	}, values)
-}
-
-func writeNewShiftSplatnetSchedule(schedule *api_objects.ShiftSplatnetSchedule) (*int64, error) {
-	stage, err := writeNewShiftSplatnetScheduleStage(&(*schedule).Stage)
-	if err != nil {
-		return nil, err
-	}
-	v := reflect.ValueOf(db_objects.ShiftSplatnetSchedule{
-		StartTime: (*schedule).StartTime,
-		EndTime:   (*schedule).EndTime,
-		Stage:     *stage,
-	})
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	pk, err := writeIntoTableGetPk("two_salmon_shift_splatnet_schedule", []string{
-		"start_time", "end_time", "stage",
-	}, values)
-	if err != nil {
-		return nil, err
-	}
-	for i := range (*schedule).Weapons {
-		if _, err := writeNewShiftSplatnetScheduleWeapon(*pk, &(*schedule).Weapons[i]); err != nil {
-			return nil, err
-		}
-	}
-	return pk, nil
-}
-
-func writeNewShiftSplatnetPlayerContainer(parent int64, player *api_objects.ShiftSplatnetPlayer) (*int64, error) {
-	playerKey, err := writeNewShiftSplatnetPlayer(player)
-	if err != nil {
-		return nil, err
-	}
-	v := reflect.ValueOf(db_objects.ShiftSplatnetPlayerContainer{
-		Parent: parent,
-		Player: *playerKey,
-	})
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTableGetPk("two_salmon_shift_splatnet_player_container", []string{
-		"parent", "player",
-	}, values)
-}
-
-func writeNewShiftSplatnetWave(parent int64, wave *api_objects.ShiftSplatnetWave) (*int64, error) {
-	waterLevel, err := writeNewSplatnetDouble(&(*wave).WaterLevel)
-	if err != nil {
-		return nil, err
-	}
-	eventType, err := writeNewSplatnetDouble(&(*wave).EventType)
-	if err != nil {
-		return nil, err
-	}
-	v := reflect.ValueOf(db_objects.ShiftSplatnetWave{
-		Parent:            parent,
-		WaterLevel:        *waterLevel,
-		EventType:         *eventType,
-		GoldenIkuraNum:    (*wave).GoldenEggs,
-		GoldenIkuraPopNum: (*wave).GoldenAppear,
-		IkuraNum:          (*wave).PowerEggs,
-		QuotaNum:          (*wave).QuotaNum,
-	})
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTableGetPk("two_salmon_shift_splatnet_wave", []string{
-		"parent", "water_level", "event_type", "golden_ikura_num", "golden_ikura_pop_num", "ikura_num", "quota_num",
-	}, values)
-}
-
-func writeNewShiftStatInkUser(user *api_objects.ShiftStatInkUser) (*int64, error) {
-	joinAt, err := writeNewStatInkTime(&(*user).JoinAt)
-	if err != nil {
-		return nil, err
-	}
-	profile, err := writeNewStatInkProfile(&(*user).Profile)
-	if err != nil {
-		return nil, err
-	}
-	stats, err := writeNewShiftStatInkUserStats(&(*user).Stats)
-	if err != nil {
-		return nil, err
-	}
-	v := reflect.ValueOf(db_objects.ShiftStatInkUser{
-		Id:         (*user).Id,
-		Name:       (*user).Name,
-		ScreenName: (*user).ScreenName,
-		Url:        (*user).Url,
-		SalmonUrl:  (*user).SalmonUrl,
-		BattleUrl:  (*user).BattleUrl,
-		JoinAt:     *joinAt,
-		Profile:    *profile,
-		Stats:      *stats,
-	})
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTableGetPk("two_salmon_shift_stat_ink_user", []string{
-		"id", "name", "screen_name", "url", "salmon_url", "battle_url", "join_at", "profile", "stats",
-	}, values)
-}
-
-func writeNewShiftStatInkTriple(triple *api_objects.ShiftStatInkTripleInt) (*int64, error) {
-	name, err := writeNewStatInkName(&(*triple).Name)
-	if err != nil {
-		return nil, err
-	}
-	v := reflect.ValueOf(db_objects.ShiftStatInkTriple{
-		Key:      (*triple).Key,
-		Name:     *name,
-		Splatnet: (*triple).Splatnet,
-	})
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTableGetPk("two_salmon_shift_stat_ink_triple", []string{
-		"key", "name", "splatnet",
-	}, values)
-}
-
-func writeNewShiftStatInkTitle(title *api_objects.ShiftStatInkTitle) (*int64, error) {
-	genericName, err := writeNewStatInkName(&(*title).GenericName)
-	if err != nil {
-		return nil, err
-	}
-	v := reflect.ValueOf(db_objects.ShiftStatInkTitle{
-		Splatnet:    (*title).Splatnet,
-		GenericName: *genericName,
-	})
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTableGetPk("two_salmon_shift_stat_ink_title", []string{
-		"splatnet", "generic_name",
-	}, values)
-}
-
-func writeNewShiftStatInkPlayer(player *api_objects.ShiftStatInkPlayer) (*int64, error) {
-	special, err := writeNewShiftStatInkTriple(&(*player).Special)
-	if err != nil {
-		return nil, err
-	}
-	species, err := writeNewStatInkKeyName(&(*player).Species)
-	if err != nil {
-		return nil, err
-	}
-	gender, err := writeNewStatInkGender(&(*player).Gender)
-	if err != nil {
-		return nil, err
-	}
-	v := reflect.ValueOf(db_objects.ShiftStatInkPlayer{
-		SplatnetId:         (*player).SplatnetId,
-		Name:               (*player).Name,
-		Special:            *special,
-		Rescue:             (*player).Rescue,
-		Death:              (*player).Death,
-		GoldenEggDelivered: (*player).GoldenEggDelivered,
-		PowerEggCollected:  (*player).PowerEggCollected,
-		Species:            *species,
-		Gender:             *gender,
-	})
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	pk, err := writeIntoTableGetPk("two_salmon_shift_stat_ink_player", []string{
-		"splatnet_id", "name", "special", "rescue", "death", "golden_egg_delivered", "power_egg_collected", "species", "gender",
-	}, values)
-	if err != nil {
-		return nil, err
-	}
-	for i := range (*player).SpecialUses {
-		if _, err := writeNewIntContainer(*pk, "two_salmon_shift_stat_ink_player", (*player).SpecialUses[i]); err != nil {
-			return nil, err
-		}
-	}
-	for i := range (*player).Weapons {
-		if _, err := writeNewShiftStatInkTripleContainer(*pk, &(*player).Weapons[i]); err != nil {
-			return nil, err
-		}
-	}
-	for i := range (*player).BossKills {
-		if _, err := writeNewShiftStatInkBossData(*pk, "two_salmon_shift_stat_ink_player", &(*player).BossKills[i]); err != nil {
-			return nil, err
-		}
-	}
-	return pk, nil
-}
-
-func writeNewShiftStatInkAgent(agent *api_objects.ShiftStatInkAgent) (*int64, error) {
-	v := reflect.ValueOf(*agent)
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTableGetPk("two_salmon_shift_stat_ink_agent", []string{
-		"name", "version",
-	}, values)
-}
-
-func writeNewIntContainer(parent int64, parentTable string, value int) (*int64, error) {
-	v := reflect.ValueOf(db_objects.IntContainer{
-		Parent:      parent,
-		ParentTable: parentTable,
-		Value:       value,
-	})
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTableGetPk("int_container", []string{
-		"parent", "parent_table", "value",
-	}, values)
-}
-
-func writeNewShiftStatInkBossData(parent int64, parentTable string, bossData *api_objects.ShiftStatInkBossData) (*int64, error) {
-	boss, err := writeNewShiftStatInkBossDataBoss(&(*bossData).Boss)
-	if err != nil {
-		return nil, err
-	}
-	v := reflect.ValueOf(db_objects.ShiftStatInkBossData{
-		Parent:      parent,
-		ParentTable: parentTable,
-		Boss:        *boss,
-		Count:       (*bossData).Count,
-	})
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTableGetPk("two_salmon_shift_stat_ink_boss_data", []string{
-		"parent", "parent_table", "boss", "count",
-	}, values)
-}
-
-func writeNewShiftStatInkWave(parent int64, wave *api_objects.ShiftStatInkWave) (*int64, error) {
-	var err error
-	var knownOccurrence *int64
-	if (*wave).KnownOccurrence != nil {
-		knownOccurrence, err = writeNewShiftStatInkTripleString((*wave).KnownOccurrence)
-		if err != nil {
-			return nil, err
-		}
-	}
-	var waterLevel *int64
-	if (*wave).WaterLevel != nil {
-		waterLevel, err = writeNewShiftStatInkTripleString((*wave).WaterLevel)
-		if err != nil {
-			return nil, err
-		}
-	}
-	v := reflect.ValueOf(db_objects.ShiftStatInkWave{
-		Parent:               parent,
-		KnownOccurrence:      knownOccurrence,
-		WaterLevel:           waterLevel,
-		GoldenEggQuota:       (*wave).GoldenEggQuota,
-		GoldenEggAppearances: (*wave).GoldenEggAppearances,
-		GoldenEggDelivered:   (*wave).GoldenEggDelivered,
-		PowerEggCollected:    (*wave).PowerEggCollected,
-	})
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTableGetPk("two_salmon_shift_stat_ink_wave", []string{
-		"parent", "known_occurrence", "water_level", "golden_egg_quota", "golden_egg_appearances",
-		"golden_egg_delivered", "power_egg_collected",
-	}, values)
-}
-
-func writeNewShiftStatInkPlayerContainer(parent int64, player *api_objects.ShiftStatInkPlayer) (*int64, error) {
-	playerKey, err := writeNewShiftStatInkPlayer(player)
-	if err != nil {
-		return nil, err
-	}
-	v := reflect.ValueOf(db_objects.ShiftStatInkPlayerContainer{
-		Parent: parent,
-		Player: *playerKey,
-	})
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTableGetPk("two_salmon_shift_stat_ink_player_container", []string{
-		"parent", "player",
-	}, values)
-}
-
-func writeNewShiftSplatnetBossCountsBoss(boss *api_objects.ShiftSplatnetBossCountsBoss) (*int64, error) {
-	bossInside := shiftSplatnetBossCountsBossDoubleToSplatnetDouble((*boss).Boss)
-	bossSub, err := writeNewSplatnetDouble(&bossInside)
-	if err != nil {
-		return nil, err
-	}
-	v := reflect.ValueOf(db_objects.ShiftSplatnetBossCountsBoss{
-		Boss:  *bossSub,
-		Count: (*boss).Count,
-	})
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTableGetPk("two_salmon_shift_splatnet_boss_counts_boss", []string{
-		"boss", "count",
-	}, values)
-}
-
-func shiftSplatnetBossCountsBossDoubleToSplatnetDouble(double api_objects.ShiftSplatnetBossCountsBossDouble) api_objects.SplatnetDouble {
-	return api_objects.SplatnetDouble{
-		Key:  fmt.Sprint(double.Key),
-		Name: double.Name,
-	}
-}
-
-func writeNewShiftSplatnetPlayerWeaponList(parent int64, weaponList *api_objects.ShiftSplatnetPlayerWeaponList) (*int64, error) {
-	weapon, err := writeNewShiftSplatnetPlayerWeaponListWeapon(&(*weaponList).Weapon)
-	if err != nil {
-		return nil, err
-	}
-	v := reflect.ValueOf(db_objects.ShiftSplatnetPlayerWeaponList{
-		Parent: parent,
-		Id:     (*weaponList).Id,
-		Weapon: *weapon,
-	})
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTableGetPk("two_salmon_shift_splatnet_player_weapon_list", []string{
-		"parent", "id", "weapon",
-	}, values)
-}
-
-func writeNewShiftSplatnetScheduleStage(stage *api_objects.ShiftSplatnetScheduleStage) (*int64, error) {
-	v := reflect.ValueOf(*stage)
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTableGetPk("two_salmon_shift_splatnet_schedule_stage", []string{
-		"image", "name",
-	}, values)
-}
-
-func writeNewShiftSplatnetScheduleWeapon(parent int64, weapon *api_objects.ShiftSplatnetScheduleWeapon) (*int64, error) {
-	var weaponSub *int64
-	if (*weapon).Weapon != nil {
-		var err error
-		if weaponSub, err = writeNewShiftSplatnetScheduleWeaponWeapon((*weapon).Weapon); err != nil {
-			return nil, err
-		}
-	}
-	var special *int64
-	if (*weapon).CoopSpecialWeapon != nil {
-		var err error
-		if special, err = writeNewShiftSplatnetScheduleWeaponSpecialWeapon((*weapon).CoopSpecialWeapon); err != nil {
-			return nil, err
-		}
-	}
-	v := reflect.ValueOf(db_objects.ShiftSplatnetScheduleWeapon{
-		Parent:            parent,
-		Id:                (*weapon).Id,
-		Weapon:            weaponSub,
-		CoopSpecialWeapon: special,
-	})
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTableGetPk("two_salmon_shift_splatnet_schedule_weapon", []string{
-		"parent", "id", "weapon", "coop_special_weapon",
-	}, values)
-}
-
-func writeNewShiftStatInkUserStats(stats *api_objects.ShiftStatInkUserStats) (*int64, error) {
-	asOf, err := writeNewStatInkTime(&(*stats).AsOf)
-	if err != nil {
-		return nil, err
-	}
-	registeredAt, err := writeNewStatInkTime(&(*stats).RegisteredAt)
-	if err != nil {
-		return nil, err
-	}
-	v := reflect.ValueOf(db_objects.ShiftStatInkUserStats{
-		WorkCount:       (*stats).WorkCount,
-		TotalGoldenEggs: (*stats).TotalGoldenEggs,
-		TotalEggs:       (*stats).TotalEggs,
-		TotalRescued:    (*stats).TotalRescued,
-		TotalPoint:      (*stats).TotalPoint,
-		AsOf:            *asOf,
-		RegisteredAt:    *registeredAt,
-	})
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTableGetPk("two_salmon_shift_stat_ink_user_stats", []string{
-		"work_count", "total_golden_eggs", "total_eggs", "total_rescued", "total_point", "as_of", "registered_at",
-	}, values)
-}
-
-func writeNewShiftStatInkTripleContainer(parent int64, triple *api_objects.ShiftStatInkTripleInt) (*int64, error) {
-	tripleKey, err := writeNewShiftStatInkTriple(triple)
-	if err != nil {
-		return nil, err
-	}
-	v := reflect.ValueOf(db_objects.ShiftStatInkTripleContainer{
-		Parent: parent,
-		Triple: *tripleKey,
-	})
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTableGetPk("two_salmon_shift_stat_ink_triple_container", []string{
-		"parent", "triple",
-	}, values)
-}
-
-func writeNewShiftStatInkTripleString(triple *api_objects.ShiftStatInkTripleString) (*int64, error) {
-	name, err := writeNewStatInkName(&(*triple).Name)
-	if err != nil {
-		return nil, err
-	}
-	v := reflect.ValueOf(db_objects.ShiftStatInkTripleString{
-		Key:      (*triple).Key,
-		Name:     *name,
-		Splatnet: (*triple).Splatnet,
-	})
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTableGetPk("two_salmon_shift_stat_ink_triple_string", []string{
-		"key", "name", "splatnet",
-	}, values)
-}
-
-func writeNewShiftStatInkStage(triple *api_objects.ShiftStatInkStage) (*int64, error) {
-	name, err := writeNewShiftStatInkStageName(&(*triple).Name)
-	if err != nil {
-		return nil, err
-	}
-	v := reflect.ValueOf(db_objects.ShiftStatInkTripleString{
-		Key:      (*triple).Key,
-		Name:     *name,
-		Splatnet: (*triple).Splatnet,
-	})
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTableGetPk("two_salmon_shift_stat_ink_triple_string", []string{
-		"key", "name", "splatnet",
-	}, values)
-}
-
-func writeNewShiftStatInkBossDataBoss(boss *api_objects.ShiftStatInkBossDataBoss) (*int64, error) {
-	v := reflect.ValueOf(*boss)
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTableGetPk("two_salmon_shift_stat_ink_boss_data_boss", []string{
-		"splatnet", "splatnet_str",
-	}, values)
-}
-
-func writeNewShiftSplatnetPlayerWeaponListWeapon(weapon *api_objects.ShiftSplatnetPlayerWeaponListWeapon) (*int64, error) {
-	v := reflect.ValueOf(*weapon)
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTableGetPk("two_salmon_shift_splatnet_player_weapon_list_weapon", []string{
-		"id", "image", "name", "thumbnail",
-	}, values)
-}
-
-func writeNewShiftSplatnetScheduleWeaponWeapon(weapon *api_objects.ShiftSplatnetScheduleWeaponWeapon) (*int64, error) {
-	v := reflect.ValueOf(*weapon)
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTableGetPk("two_salmon_shift_splatnet_schedule_weapon_weapon", []string{
-		"id", "image", "name", "thumbnail",
-	}, values)
-}
-
-func writeNewShiftSplatnetScheduleWeaponSpecialWeapon(weapon *api_objects.ShiftSplatnetScheduleWeaponSpecialWeapon) (*int64, error) {
-	v := reflect.ValueOf(*weapon)
-	values := make([]interface{}, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-	return writeIntoTableGetPk("two_salmon_shift_splatnet_schedule_weapon_special_weapon", []string{
-		"image", "name",
-	}, values)
+func WriteNewBattle3(battle *api_objects.Battle3, userId int64) error {
+	return nil
 }
 
 func VerifyEmailUser(email string) error {

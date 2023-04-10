@@ -1,4 +1,4 @@
-package api_code
+package two
 
 /* This file is part of SplatStatsGo.
  *
@@ -28,7 +28,7 @@ import (
 	"strconv"
 )
 
-func AddShift(w http.ResponseWriter, r *http.Request) {
+func AddBattle(w http.ResponseWriter, r *http.Request) {
 	sessionToken := r.Header.Get("session_token")
 	if sessionToken == "" {
 		log.Println("Session cookie not included")
@@ -38,132 +38,127 @@ func AddShift(w http.ResponseWriter, r *http.Request) {
 	}
 	user, err := obj_sql.CheckSessionToken(sessionToken)
 	if err != nil {
-		log.Println("Called by AddShift(" + fmt.Sprint(w) + ", " + fmt.Sprint(r) + ")")
 		log.Println(err)
 		w.Header().Set("WWW-Authenticate", "/api/auth/signin")
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	var shift api_objects.Shift
-	if err := json.NewDecoder(r.Body).Decode(&shift); err != nil {
-		log.Println("Called by AddShift(" + fmt.Sprint(w) + ", " + fmt.Sprint(r) + ")")
+	var battle api_objects.Battle2
+	if err := json.NewDecoder(r.Body).Decode(&battle); err != nil {
 		log.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	shift.UserId = *user
-	err = obj_sql.WriteNewShift(&shift)
-	if fmt.Sprint(err) == "shift already exists" {
-		w.Header().Set("Location", "/api/two_salmon/"+fmt.Sprint(shift.UserId)+"/"+fmt.Sprint(shift.JobId))
+	battle.UserId = *user
+	err = obj_sql.WriteNewBattle(&battle)
+	if fmt.Sprint(err) == "battle already exists" {
+		w.Header().Set("Location", "/api/two_battles/"+fmt.Sprint(battle.UserId)+"/"+fmt.Sprint(battle.BattleNumber))
 		w.WriteHeader(http.StatusFound)
 		return
 	}
 	if err != nil {
-		log.Println("Called by AddShift(" + fmt.Sprint(w) + ", " + fmt.Sprint(r) + ")")
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.Header().Set("Location", "/api/two_salmon/"+fmt.Sprint(shift.UserId)+"/"+fmt.Sprint(shift.JobId))
+	w.Header().Set("Location", "/api/two_battles/"+fmt.Sprint(battle.UserId)+"/"+fmt.Sprint(battle.BattleNumber))
 	w.WriteHeader(http.StatusCreated)
 }
 
-func GetShiftById(w http.ResponseWriter, r *http.Request) {
+func GetBattleById(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
 	dir, file := path.Split(r.URL.Path)
 	userNum, err := strconv.ParseInt(path.Base(dir), 0, 64)
 	if err != nil {
-		log.Println("Called by GetShiftById(" + fmt.Sprint(w) + ", " + fmt.Sprint(r) + ")")
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	splatnetNum, err := strconv.ParseInt(file, 0, 64)
 	if err != nil {
-		log.Println("Called by GetShiftById(" + fmt.Sprint(w) + ", " + fmt.Sprint(r) + ")")
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	shift, err := obj_sql.GetShiftLean(userNum, splatnetNum)
+	battle, err := obj_sql.GetBattleLean(userNum, splatnetNum)
 	if err != nil {
-		log.Println("Called by GetShiftById(" + fmt.Sprint(w) + ", " + fmt.Sprint(r) + ")")
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	shiftMarshalled, err := json.Marshal(*shift)
+	battleMarshalled, err := json.Marshal(*battle)
 	if err != nil {
-		log.Println("Called by GetShiftById(" + fmt.Sprint(w) + ", " + fmt.Sprint(r) + ")")
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	if _, err := w.Write(shiftMarshalled); err != nil {
-		log.Println("Called by GetShiftById(" + fmt.Sprint(w) + ", " + fmt.Sprint(r) + ")")
+	if _, err := w.Write(battleMarshalled); err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 }
 
-func GetShifts(w http.ResponseWriter, r *http.Request) {
+func GetBattles(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	_, salmonQuery, columns := common.GetSalmonQuery(r)
-	_, timeQuery := common.GetTimeQuery(r)
+	_, battlesQuery, columns := common.GetBattlesQuery(r)
 	startAt, endAt := common.GetBounds(r)
-	salmonQuery = append(salmonQuery, timeQuery[0], timeQuery[1])
-	columns = append(columns, "play_timefrom", "play_timeto")
-	shifts, err := obj_sql.GetShiftsLean(salmonQuery, columns, startAt, endAt, common.GetSort(r))
+	_, timeQuery := common.GetTimeQuery(r)
+	battlesQuery = append(battlesQuery, timeQuery[0], timeQuery[1])
+	columns = append(columns, "timefrom", "timeto")
+	battles, err := obj_sql.GetBattlesLean(battlesQuery, columns, startAt, endAt, common.GetSort(r))
 	if err != nil {
-		log.Println("Called by GetShifts(" + fmt.Sprint(w) + ", " + fmt.Sprint(r) + ")")
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	shiftsMarshalled, err := json.Marshal(shifts)
+	battlesMarshalled, err := json.Marshal(battles)
 	if err != nil {
-		log.Println("Called by GetShifts(" + fmt.Sprint(w) + ", " + fmt.Sprint(r) + ")")
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	if _, err := w.Write(shiftsMarshalled); err != nil {
-		log.Println("Called by GetShifts(" + fmt.Sprint(w) + ", " + fmt.Sprint(r) + ")")
+	if _, err := w.Write(battlesMarshalled); err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 }
 
-func GetShiftsForUser(w http.ResponseWriter, r *http.Request) {
+func GetBattlesForUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	startAt, endAt := common.GetBounds(r)
+	_, battlesQuery, columns := common.GetBattlesQuery(r)
 	userNum, err := strconv.ParseInt(path.Base(r.URL.Path), 0, 64)
 	if err != nil {
-		log.Println("Called by GetShiftsForUser(" + fmt.Sprint(w) + ", " + fmt.Sprint(r) + ")")
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	startAt, endAt := common.GetBounds(r)
-	shifts, err := obj_sql.GetShiftsUser(userNum, startAt, endAt, common.GetSort(r))
+	var battles []api_objects.Battle2
+	if common.CheckAllFlag(r) {
+		battles, err = obj_sql.GetBattlesUser(userNum, battlesQuery, columns, startAt, endAt, common.GetSort(r))
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	} else {
+		battles, err = obj_sql.GetBattlesLeanUser(userNum, battlesQuery, columns, startAt, endAt, common.GetSort(r))
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+	battlesMarshalled, err := json.Marshal(battles)
 	if err != nil {
-		log.Println("Called by GetShiftsForUser(" + fmt.Sprint(w) + ", " + fmt.Sprint(r) + ")")
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	shiftsMarshalled, err := json.Marshal(shifts)
-	if err != nil {
-		log.Println("Called by GetShiftsForUser(" + fmt.Sprint(w) + ", " + fmt.Sprint(r) + ")")
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	if _, err := w.Write(shiftsMarshalled); err != nil {
-		log.Println("Called by GetShiftsForUser(" + fmt.Sprint(w) + ", " + fmt.Sprint(r) + ")")
+	if _, err := w.Write(battlesMarshalled); err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return

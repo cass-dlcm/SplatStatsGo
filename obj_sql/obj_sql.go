@@ -5,37 +5,22 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/cass-dlcm/SplatStatsGo/enums"
-	"github.com/cass-dlcm/SplatStatsGo/secrets"
 	"log"
-	"os"
 	"runtime/debug"
 	"strings"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 )
 
 var db *sql.DB
 
 func init() {
-	user := "splatstats_go"
-	if os.Getenv("DEBUG") == "TRUE" {
-		dbPass := secrets.GetSecret("DATABASE_PASSWORD_LOCAL")
-		dbURI := fmt.Sprintf("%s:%s@/db?parseTime=true", user, dbPass)
-		var err error
-		db, err = sql.Open("mysql", dbURI)
-		if err != nil {
-			panic(fmt.Sprintf("DB: %v", err))
-		}
-	} else {
-		dbPass := secrets.GetSecret("DATABASE_PASSWORD")
-		connectionName := secrets.GetSecret("DATABASE_HOST")
-		dbURI := fmt.Sprintf("%s:%s@unix(/cloudsql/%s)/db?parseTime=true", user, dbPass, connectionName)
-		var err error
-		db, err = sql.Open("mysql", dbURI)
-		if err != nil {
-			panic(fmt.Sprintf("DB: %v", err))
-		}
+	dbURI := "host=localhost port=5432 user=postgres password=testPass dbname=postgres sslmode=disable"
+	var err error
+	db, err = sql.Open("postgres", dbURI)
+	if err != nil {
+		panic(fmt.Sprintf("DB: %v", err))
 	}
 	db.SetConnMaxLifetime(time.Minute * 3)
 	db.SetMaxOpenConns(10)
