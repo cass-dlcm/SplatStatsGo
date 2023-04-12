@@ -1605,7 +1605,7 @@ func WriteNewShift3(shift *api_objects.Shift3, userId int64) error {
 		if err := shift.Data.CoopHistoryDetail.BossResult.Boss.DecodeId(); err != nil {
 			return err
 		}
-		if _, err := db.Exec("insert into three_salmon_shift (userId, typename, id, afterGrade, playerByname, playerBackground, playerName,\n                                playerNameId, playerUniform, playerId, playerSpecies, playerSpecialWeapon,\n                                playerDefeatEnemyCount, playerDeliverCount, playerGoldenAssistCount,\n                                playerGoldenDeliverCount, playerRescueCount, playerRescuedCount, resultWave, playedTime,\n                                rule, stage, dangerRate, scenarioCode, smellMeter, afterGradePoint, scaleBronze,\n                                scaleSilver, scaleGold, jobPoint, jobScore, jobRate, jobBonus, hasDefeatBoss, boss)\nvalues ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24,\n        $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35);",
+		if _, err := db.Exec("insert into three_salmon_shift (userId, typename, id, afterGrade, playerByname, playerBackground, playerName,\n                                playerNameId, playerUniform, playerId, playerSpecies, playerSpecialWeapon,\n                                playerDefeatEnemyCount, playerDeliverCount, playerGoldenAssistCount,\n                                playerGoldenDeliverCount, playerRescueCount, playerRescuedCount, resultWave, playedTime,\n                                rule, stage, dangerRate, scenarioCode, smellMeter, afterGradePoint, scaleBronze,\n                                scaleSilver, scaleGold, jobPoint, jobScore, jobRate, jobBonus, hasDefeatBoss, boss,\n                                weapon0, weapon1, weapon2, weapon3)\nvalues ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24,\n        $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39);",
 			userId, shift.Data.CoopHistoryDetail.Typename, shift.Data.CoopHistoryDetail.ID, shift.Data.CoopHistoryDetail.AfterGrade.ID,
 			shift.Data.CoopHistoryDetail.MyResult.Player.Byname, shift.Data.CoopHistoryDetail.MyResult.Player.Nameplate.Background.ID,
 			shift.Data.CoopHistoryDetail.MyResult.Player.Name, shift.Data.CoopHistoryDetail.MyResult.Player.NameID,
@@ -1625,11 +1625,12 @@ func WriteNewShift3(shift *api_objects.Shift3, userId int64) error {
 			shift.Data.CoopHistoryDetail.Scale.Gold, shift.Data.CoopHistoryDetail.JobPoint,
 			shift.Data.CoopHistoryDetail.JobScore, shift.Data.CoopHistoryDetail.JobRate,
 			shift.Data.CoopHistoryDetail.JobBonus, shift.Data.CoopHistoryDetail.BossResult.HasDefeatBoss, shift.Data.CoopHistoryDetail.BossResult.Boss.ID,
+			shift.Data.CoopHistoryDetail.Weapons[0].Name, shift.Data.CoopHistoryDetail.Weapons[1].Name, shift.Data.CoopHistoryDetail.Weapons[2].Name, shift.Data.CoopHistoryDetail.Weapons[3].Name,
 		); err != nil {
 			return err
 		}
 	} else {
-		if _, err := db.Exec("insert into three_salmon_shift (userId, typename, id, afterGrade, playerByname, playerBackground, playerName,\n                                playerNameId, playerUniform, playerId, playerSpecies, playerSpecialWeapon,\n                                playerDefeatEnemyCount, playerDeliverCount, playerGoldenAssistCount,\n                                playerGoldenDeliverCount, playerRescueCount, playerRescuedCount, resultWave, playedTime,\n                                rule, stage, dangerRate, scenarioCode, smellMeter, afterGradePoint, jobPoint, jobScore,\n                                jobRate, jobBonus)\nvalues ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24,\n        $25, $26, $27, $28, $29, $30);",
+		if _, err := db.Exec("insert into three_salmon_shift (userId, typename, id, afterGrade, playerByname, playerBackground, playerName,\n                                playerNameId, playerUniform, playerId, playerSpecies, playerSpecialWeapon,\n                                playerDefeatEnemyCount, playerDeliverCount, playerGoldenAssistCount,\n                                playerGoldenDeliverCount, playerRescueCount, playerRescuedCount, resultWave, playedTime,\n                                rule, stage, dangerRate, scenarioCode, smellMeter, afterGradePoint, jobPoint, jobScore,\n                                jobRate, jobBonus, weapon0, weapon1, weapon2, weapon3)\nvalues ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24,\n        $25, $26, $27, $28, $29, $30, $31, $32, $33, $34);",
 			userId, shift.Data.CoopHistoryDetail.Typename, shift.Data.CoopHistoryDetail.ID, shift.Data.CoopHistoryDetail.AfterGrade.ID,
 			shift.Data.CoopHistoryDetail.MyResult.Player.Byname, shift.Data.CoopHistoryDetail.MyResult.Player.Nameplate.Background.ID,
 			shift.Data.CoopHistoryDetail.MyResult.Player.Name,
@@ -1648,6 +1649,7 @@ func WriteNewShift3(shift *api_objects.Shift3, userId int64) error {
 			shift.Data.CoopHistoryDetail.SmellMeter, shift.Data.CoopHistoryDetail.AfterGradePoint,
 			shift.Data.CoopHistoryDetail.JobPoint, shift.Data.CoopHistoryDetail.JobScore,
 			shift.Data.CoopHistoryDetail.JobRate, shift.Data.CoopHistoryDetail.JobBonus,
+			shift.Data.CoopHistoryDetail.Weapons[0].Name, shift.Data.CoopHistoryDetail.Weapons[1].Name, shift.Data.CoopHistoryDetail.Weapons[2].Name, shift.Data.CoopHistoryDetail.Weapons[3].Name,
 		); err != nil {
 			return err
 		}

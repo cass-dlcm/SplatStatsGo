@@ -11,7 +11,7 @@ create table three_salmon_shift
     playerUniform            text          not null,
     playerId                 text          not null,
     playerSpecies            text          not null,
-    playerSpecialWeapon      int          not null,
+    playerSpecialWeapon      int           not null,
     playerDefeatEnemyCount   int           not null,
     playerDeliverCount       int           not null,
     playerGoldenAssistCount  int           not null,
@@ -35,6 +35,10 @@ create table three_salmon_shift
     jobBonus                 int           not null,
     hasDefeatBoss            boolean,
     boss                     text,
+    weapon0                  text not null,
+    weapon1                  text not null,
+    weapon2                  text not null,
+    weapon3                  text not null,
     primary key (userId, id),
     constraint three_salmon_shift_user foreign key (userId) references auth_user (pk) on delete cascade
 );
@@ -107,7 +111,7 @@ create table three_salmon_player
     uniform            text   not null,
     id                 text   not null,
     species            text   not null,
-    special            int   not null,
+    special            int    not null,
     defeatEnemyCount   int    not null,
     deliverCount       int    not null,
     goldenAssistCount  int    not null,
@@ -131,11 +135,11 @@ create table three_salmon_player_badge
 
 create table three_salmon_player_weapon
 (
-    userId    bigint not null,
-    shiftId   text   not null,
-    playerId  text   not null,
-    wave int not null,
-    weapon text not null,
+    userId   bigint not null,
+    shiftId  text   not null,
+    playerId text   not null,
+    wave     int    not null,
+    weapon   text   not null,
     primary key (userId, shiftId, playerId, wave),
     constraint three_salmon_player_weapon_player foreign key (userId, shiftId, playerId) references three_salmon_player (userId, shiftID, id)
 )

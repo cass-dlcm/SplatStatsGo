@@ -64,7 +64,7 @@ create table three_battle_my_player
     clothingName        text    not null,
     clothingMain        text    not null,
     shoesName           text    not null,
-    shoesGear           text    not null,
+    shoesMain           text    not null,
     paint               int     not null,
     kill                int     not null,
     death               int     not null,

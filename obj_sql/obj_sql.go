@@ -227,7 +227,6 @@ func readKeyArrayWithKeyCondition(startKey int64, condition interface{}, startKe
 
 func writeIntoTable(objectTable string, columnList []string, values []interface{}) error {
 	if _, err := db.Exec("INSERT INTO " + objectTable + " (" + createColumnListString(columnList) + ") VALUES(" + fmt.Sprint(processValues(values)...) + ");"); err != nil {
-		log.Println("INSERT INTO " + objectTable + " (" + createColumnListString(columnList) + ") VALUES(" + fmt.Sprint(processValues(values)...) + ");")
 		debug.PrintStack()
 		return err
 	}

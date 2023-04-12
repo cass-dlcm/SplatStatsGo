@@ -1,3 +1,4 @@
+// Package three (of [api_code] contains HTTP handlers for Splatoon 3 SplatStats API endpoints.
 package three
 
 import (
@@ -83,6 +84,7 @@ func GetShifts(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	userId := q.Get("userId")
 	stage := q.Get("stage")
+	namesOnly := q.Get("namesOnly") == "true"
 	var resultWave int64
 	var err error
 	var timeFrom, timeTo time.Time
@@ -116,7 +118,26 @@ func GetShifts(w http.ResponseWriter, r *http.Request) {
 	} else {
 		resultWave = -1
 	}
-	shifts, err := obj_sql.GetShifts3(userId, stage, int(resultWave), timeFrom, timeTo)
+	if namesOnly {
+		shifts, err := obj_sql.GetShiftNames3(userId, stage, int(resultWave), timeFrom, timeTo)
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		shiftsMarshalled, err := json.Marshal(shifts)
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		if _, err := w.Write(shiftsMarshalled); err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+	shifts, err := obj_sql.GetShiftStubs3(userId, stage, int(resultWave), timeFrom, timeTo)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
