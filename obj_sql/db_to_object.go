@@ -3057,29 +3057,29 @@ func GetShiftStubs3(userId, stage string, resultWave int, timeFrom, timeTo time.
 	if userId != "" {
 		if stage != "" {
 			if resultWave != -1 {
-				rows, err = db.Query("select userId,\n       id,\n       playerId,\n       playedtime,\n       stage,\n       weapon0,\n       weapon1,\n       weapon2,\n       weapon3,\n       playerspecialweapon,\n       resultwave,\n       coalesce(hasDefeatBoss, ''),\n       smellMeter,\n       dangerrate,\n       aftergrade,\n       aftergradepoint\nfrom three_salmon_shift\nwhere userId = $1\n  and stage = $2\n  and resultwave = $3\n  and playedtime >= $4\n  and playedTime <= $5;", userId, stage, resultWave, timeFrom, timeTo)
+				rows, err = db.Query("select userId,\n       id,\n       playerId,\n       playedtime,\n       stage,\n       weapon0,\n       weapon1,\n       weapon2,\n       weapon3,\n       playerspecialweapon,\n       resultwave,\n       coalesce(hasDefeatBoss, false),\n       smellMeter,\n       dangerrate,\n       aftergrade,\n       aftergradepoint,\n       coalesce(boss, '')\nfrom three_salmon_shift\nwhere userId = $1\n  and stage = $2\n  and resultwave = $3\n  and playedtime >= $4\n  and playedTime <= $5;", userId, stage, resultWave, timeFrom, timeTo)
 			} else {
-				rows, err = db.Query("select userId,\n       id,\n       playerId,\n       playedtime,\n       stage,\n       weapon0,\n       weapon1,\n       weapon2,\n       weapon3,\n       playerspecialweapon,\n       resultwave,\n       coalesce(hasDefeatBoss, ''),\n       smellMeter,\n       dangerrate,\n       aftergrade,\n       aftergradepoint\nfrom three_salmon_shift\nwhere userID = $1\n  and stage = $2\n  and playedtime >= $3\n  and playedTime <= $4;", userId, stage, timeFrom, timeTo)
+				rows, err = db.Query("select userId,\n       id,\n       playerId,\n       playedtime,\n       stage,\n       weapon0,\n       weapon1,\n       weapon2,\n       weapon3,\n       playerspecialweapon,\n       resultwave,\n       coalesce(hasDefeatBoss, false),\n       smellMeter,\n       dangerrate,\n       aftergrade,\n       aftergradepoint,\n       coalesce(boss, '')\nfrom three_salmon_shift\nwhere userID = $1\n  and stage = $2\n  and playedtime >= $3\n  and playedTime <= $4;", userId, stage, timeFrom, timeTo)
 			}
 		} else {
 			if resultWave != -1 {
-				rows, err = db.Query("select userId,\n       id,\n       playerId,\n       playedtime,\n       stage,\n       weapon0,\n       weapon1,\n       weapon2,\n       weapon3,\n       playerspecialweapon,\n       resultwave,\n       coalesce(hasDefeatBoss, 'false'),\n       smellMeter,\n       dangerrate,\n       aftergrade,\n       aftergradepoint\nfrom three_salmon_shift\nwhere userId = $1 \n  and resultwave = $2\n  and playedtime >= $3\n  and playedTime <= $4;\n", userId, resultWave, timeFrom, timeTo)
+				rows, err = db.Query("select userId,\n       id,\n       playerId,\n       playedtime,\n       stage,\n       weapon0,\n       weapon1,\n       weapon2,\n       weapon3,\n       playerspecialweapon,\n       resultwave,\n       coalesce(hasDefeatBoss, false),\n       smellMeter,\n       dangerrate,\n       aftergrade,\n       aftergradepoint,\n       coalesce(boss, '')\nfrom three_salmon_shift\nwhere userId = $1 \n  and resultwave = $2\n  and playedtime >= $3\n  and playedTime <= $4;\n", userId, resultWave, timeFrom, timeTo)
 			} else {
-				rows, err = db.Query("select userId,\n       id,\n       playerId,\n       playedtime,\n       stage,\n       weapon0,\n       weapon1,\n       weapon2,\n       weapon3,\n       playerspecialweapon,\n       resultwave,\n       coalesce(hasDefeatBoss, 'false'),\n       smellMeter,\n       dangerrate,\n       aftergrade,\n       aftergradepoint\nfrom three_salmon_shift\nwhere userId = $1 \n  and playedtime >= $2\n  and playedTime <= $3;", userId, timeFrom, timeTo)
+				rows, err = db.Query("select userId,\n       id,\n       playerId,\n       playedtime,\n       stage,\n       weapon0,\n       weapon1,\n       weapon2,\n       weapon3,\n       playerspecialweapon,\n       resultwave,\n       coalesce(hasDefeatBoss, false),\n       smellMeter,\n       dangerrate,\n       aftergrade,\n       aftergradepoint,\n       coalesce(boss, '')\nfrom three_salmon_shift\nwhere userId = $1 \n  and playedtime >= $2\n  and playedTime <= $3;", userId, timeFrom, timeTo)
 			}
 		}
 	} else {
 		if stage != "" {
 			if resultWave != -1 {
-				rows, err = db.Query("select userId,\n       id,\n       playerId,\n       playedtime,\n       stage,\n       weapon0,\n       weapon1,\n       weapon2,\n       weapon3,\n       playerspecialweapon,\n       resultwave,\n       coalesce(hasDefeatBoss, 'false'),\n       smellMeter,\n       dangerrate,\n       aftergrade,\n       aftergradepoint\nfrom three_salmon_shift\nwhere stage = $1\n  and resultwave = $2\n  and playedtime >= $3\n  and playedTime <= $4;", stage, resultWave, timeFrom, timeTo)
+				rows, err = db.Query("select userId,\n       id,\n       playerId,\n       playedtime,\n       stage,\n       weapon0,\n       weapon1,\n       weapon2,\n       weapon3,\n       playerspecialweapon,\n       resultwave,\n       coalesce(hasDefeatBoss, false),\n       smellMeter,\n       dangerrate,\n       aftergrade,\n       aftergradepoint,\n       coalesce(boss, '')\nfrom three_salmon_shift\nwhere stage = $1\n  and resultwave = $2\n  and playedtime >= $3\n  and playedTime <= $4;", stage, resultWave, timeFrom, timeTo)
 			} else {
-				rows, err = db.Query("select userId,\n       id,\n       playerId,\n       playedtime,\n       stage,\n       weapon0,\n       weapon1,\n       weapon2,\n       weapon3,\n       playerspecialweapon,\n       resultwave,\n       coalesce(hasDefeatBoss, 'false'),\n       smellMeter,\n       dangerrate,\n       aftergrade,\n       aftergradepoint\nfrom three_salmon_shift\nwhere stage = $1\n  and playedtime >= $2\n  and playedTime <= $3;", stage, timeFrom, timeTo)
+				rows, err = db.Query("select userId,\n       id,\n       playerId,\n       playedtime,\n       stage,\n       weapon0,\n       weapon1,\n       weapon2,\n       weapon3,\n       playerspecialweapon,\n       resultwave,\n       coalesce(hasDefeatBoss, false),\n       smellMeter,\n       dangerrate,\n       aftergrade,\n       aftergradepoint,\n       coalesce(boss, '')\nfrom three_salmon_shift\nwhere stage = $1\n  and playedtime >= $2\n  and playedTime <= $3;", stage, timeFrom, timeTo)
 			}
 		} else {
 			if resultWave != -1 {
-				rows, err = db.Query("select userId,\n       id,\n       playerId,\n       playedtime,\n       stage,\n       weapon0,\n       weapon1,\n       weapon2,\n       weapon3,\n       playerspecialweapon,\n       resultwave,\n       coalesce(hasDefeatBoss, 'false'),\n       smellMeter,\n       dangerrate,\n       aftergrade,\n       aftergradepoint\nfrom three_salmon_shift\nwhere resultwave = $1\n  and playedtime >= $2\n  and playedTime <= $3;\n", resultWave, timeFrom, timeTo)
+				rows, err = db.Query("select userId,\n       id,\n       playerId,\n       playedtime,\n       stage,\n       weapon0,\n       weapon1,\n       weapon2,\n       weapon3,\n       playerspecialweapon,\n       resultwave,\n       coalesce(hasDefeatBoss, false),\n       smellMeter,\n       dangerrate,\n       aftergrade,\n       aftergradepoint,\n       coalesce(boss, '')\nfrom three_salmon_shift\nwhere resultwave = $1\n  and playedtime >= $2\n  and playedTime <= $3;\n", resultWave, timeFrom, timeTo)
 			} else {
-				rows, err = db.Query("select userId,\n       id,\n       playerId,\n       playedtime,\n       stage,\n       weapon0,\n       weapon1,\n       weapon2,\n       weapon3,\n       playerspecialweapon,\n       resultwave,\n       coalesce(hasDefeatBoss, 'false'),\n       smellMeter,\n       dangerrate,\n       aftergrade,\n       aftergradepoint\nfrom three_salmon_shift\nwhere playedtime >= $1\n  and playedTime <= $2;", timeFrom, timeTo)
+				rows, err = db.Query("select userId,\n       id,\n       playerId,\n       playedtime,\n       stage,\n       weapon0,\n       weapon1,\n       weapon2,\n       weapon3,\n       playerspecialweapon,\n       resultwave,\n       coalesce(hasDefeatBoss, false),\n       smellMeter,\n       dangerrate,\n       aftergrade,\n       aftergradepoint,\n       coalesce(boss, '')\nfrom three_salmon_shift\nwhere playedtime >= $1\n  and playedTime <= $2;", timeFrom, timeTo)
 			}
 		}
 	}
@@ -3093,8 +3093,9 @@ func GetShiftStubs3(userId, stage string, resultWave int, timeFrom, timeTo time.
 		var shift api_objects.Shift3
 		playerWeapons := []api_objects.Weapon{}
 		weapons := make([]api_objects.Weapon, 4)
-		var hasDefeatBoss interface{}
-		if err := rows.Scan(&userId, &shift.Data.CoopHistoryDetail.ID, &shift.Data.CoopHistoryDetail.MyResult.Player.ID, &shift.Data.CoopHistoryDetail.PlayedTime, &shift.Data.CoopHistoryDetail.CoopStage.ID, &weapons[0].Name, &weapons[1].Name, &weapons[2].Name, &weapons[3].Name, &shift.Data.CoopHistoryDetail.MyResult.SpecialWeapon.WeaponID, &shift.Data.CoopHistoryDetail.ResultWave, &hasDefeatBoss, &shift.Data.CoopHistoryDetail.SmellMeter, &shift.Data.CoopHistoryDetail.DangerRate, &shift.Data.CoopHistoryDetail.AfterGrade.ID, &shift.Data.CoopHistoryDetail.AfterGradePoint); err != nil {
+		var hasDefeatBoss bool
+		var boss string
+		if err := rows.Scan(&userId, &shift.Data.CoopHistoryDetail.ID, &shift.Data.CoopHistoryDetail.MyResult.Player.ID, &shift.Data.CoopHistoryDetail.PlayedTime, &shift.Data.CoopHistoryDetail.CoopStage.ID, &weapons[0].Name, &weapons[1].Name, &weapons[2].Name, &weapons[3].Name, &shift.Data.CoopHistoryDetail.MyResult.SpecialWeapon.WeaponID, &shift.Data.CoopHistoryDetail.ResultWave, &hasDefeatBoss, &shift.Data.CoopHistoryDetail.SmellMeter, &shift.Data.CoopHistoryDetail.DangerRate, &shift.Data.CoopHistoryDetail.AfterGrade.ID, &shift.Data.CoopHistoryDetail.AfterGradePoint, &boss); err != nil {
 			return nil, err
 		}
 		subRows, err := db.Query("select weapon from three_salmon_user_weapon where userId=$1 and shiftid=$2;", userId, shift.Data.CoopHistoryDetail.ID)
@@ -3109,13 +3110,13 @@ func GetShiftStubs3(userId, stage string, resultWave int, timeFrom, timeTo time.
 			}
 			playerWeapons = append(playerWeapons, w)
 		}
-		if hasDefeatBoss != "" {
+		if boss != "" {
 			log.Println(hasDefeatBoss)
 			shift.Data.CoopHistoryDetail.BossResult = &api_objects.BossResult{
-				HasDefeatBoss: hasDefeatBoss.(bool),
-			}
-			if err := db.QueryRow("select coalesce(boss, '') from three_salmon_shift where userId=$1 and id=$2", userId, shift.Data.CoopHistoryDetail.ID).Scan(&shift.Data.CoopHistoryDetail.BossResult.Boss.ID); err != nil {
-				return nil, err
+				HasDefeatBoss: hasDefeatBoss,
+				Boss: api_objects.Enemy{
+					Name: boss,
+				},
 			}
 			shift.Data.CoopHistoryDetail.BossResult.Boss.FillFromId()
 		}
@@ -3142,9 +3143,10 @@ func GetShift3(userId int64, shiftId string) (*api_objects.Shift3, error) {
 	}
 	shiftId = shift.Data.CoopHistoryDetail.ID
 	var scaleBronze, scaleSilver, scaleGold *int
-	var hasDefeatBoss *bool
-	var boss *string
-	if err := db.QueryRow("select typename,\n       aftergrade,\n       playerbyname,\n       playerbackground,\n       playername,\n       playernameid,\n       playeruniform,\n       playerid,\n       playerspecies,\n       playerspecialweapon,\n       playerdefeatenemycount,\n       playerdelivercount,\n       playergoldenassistcount,\n       playergoldendelivercount,\n       playerrescuecount,\n       playerrescuedcount,\n       resultwave,\n       playedtime,\n       rule,\n       stage,\n       dangerrate,\n       scenariocode,\n       smellmeter,\n       aftergradepoint,\n       scalebronze,\n       scalesilver,\n       scalegold,\n       jobpoint,\n       jobscore,\n       jobrate,\n       jobbonus,\n       hasdefeatboss,\n       boss\nfrom three_salmon_shift\nwhere userid = $1\n  and id = $2;",
+	var hasDefeatBoss bool
+	var boss string
+	weapons := make([]api_objects.Weapon, 4)
+	if err := db.QueryRow("select typename,\n       aftergrade,\n       playerbyname,\n       playerbackground,\n       playername,\n       playernameid,\n       playeruniform,\n       playerid,\n       playerspecies,\n       playerspecialweapon,\n       playerdefeatenemycount,\n       playerdelivercount,\n       playergoldenassistcount,\n       playergoldendelivercount,\n       playerrescuecount,\n       playerrescuedcount,\n       resultwave,\n       playedtime,\n       rule,\n       stage,\n       dangerrate,\n       scenariocode,\n       smellmeter,\n       aftergradepoint,\n       scalebronze,\n       scalesilver,\n       scalegold,\n       jobpoint,\n       jobscore,\n       jobrate,\n       jobbonus,\n       coalesce(hasdefeatboss, false),\n       coalesce(boss, ''),\n       weapon0,\n       weapon1,\n       weapon2,\n       weapon3\nfrom three_salmon_shift\nwhere userid = $1\n  and id = $2;",
 		userId, shift.Data.CoopHistoryDetail.ID).Scan(&shift.Data.CoopHistoryDetail.Typename, &shift.Data.CoopHistoryDetail.AfterGrade.ID,
 		&shift.Data.CoopHistoryDetail.MyResult.Player.Byname,
 		&shift.Data.CoopHistoryDetail.MyResult.Player.Nameplate.Background.ID,
@@ -3162,9 +3164,11 @@ func GetShift3(userId int64, shiftId string) (*api_objects.Shift3, error) {
 		&shift.Data.CoopHistoryDetail.AfterGradePoint, &scaleBronze, &scaleSilver, &scaleGold,
 		&shift.Data.CoopHistoryDetail.JobPoint, &shift.Data.CoopHistoryDetail.JobScore,
 		&shift.Data.CoopHistoryDetail.JobRate, &shift.Data.CoopHistoryDetail.JobBonus, &hasDefeatBoss, &boss,
+		&weapons[0].Name, &weapons[1].Name, &weapons[2].Name, &weapons[3].Name,
 	); err != nil {
 		return nil, err
 	}
+	shift.Data.CoopHistoryDetail.Weapons = weapons
 	shift.Data.CoopHistoryDetail.AfterGrade.FillFromId()
 	shift.Data.CoopHistoryDetail.MyResult.SpecialWeapon.FillFromId()
 	shift.Data.CoopHistoryDetail.MyResult.Player.Nameplate.Background.FillFromId()
@@ -3172,14 +3176,14 @@ func GetShift3(userId int64, shiftId string) (*api_objects.Shift3, error) {
 	shift.EncodeId()
 	shift.Data.CoopHistoryDetail.CoopStage.FillFromId()
 	shift.Data.CoopHistoryDetail.MyResult.Player.IsPlayer = "CoopPlayer"
-	if hasDefeatBoss != nil {
+	if boss != "" {
 		shift.Data.CoopHistoryDetail.BossResult = &api_objects.BossResult{
-			HasDefeatBoss: *hasDefeatBoss,
+			HasDefeatBoss: hasDefeatBoss,
 			Boss: struct {
 				Name  string            `json:"name"`
 				ID    string            `json:"id"`
 				Image api_objects.Image `json:"image"`
-			}{ID: *boss},
+			}{ID: boss},
 		}
 		shift.Data.CoopHistoryDetail.BossResult.Boss.FillFromId()
 		shift.Data.CoopHistoryDetail.Scale = &api_objects.Scale{
@@ -3210,7 +3214,7 @@ func GetShift3(userId int64, shiftId string) (*api_objects.Shift3, error) {
 	}
 	if err := func() error {
 		shift.Data.CoopHistoryDetail.MyResult.Weapons = []api_objects.Weapon{}
-		rows, err := db.Query("select weapon from three_salmon_player_weapon where userid=$1 and shiftId=$2 order by wave;",
+		rows, err := db.Query("select weapon from three_salmon_user_weapon where userid=$1 and shiftId=$2 order by wave;",
 			userId, shiftId)
 		if err != nil {
 			return err
