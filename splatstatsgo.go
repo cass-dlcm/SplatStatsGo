@@ -18,6 +18,7 @@ package main
 
 import (
 	"github.com/cass-dlcm/SplatStatsGo/routing"
+	"github.com/gorilla/handlers"
 	"log"
 	"net/http"
 )
@@ -27,5 +28,5 @@ func main() {
 
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
 	log.Printf("Server started")
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(":8080", handlers.CORS()(router)))
 }
